@@ -1,0 +1,1 @@
+# AI-Powered-Intelligent-Document-Processing-IDP-Platform
