@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDP Folder Explorer Widget</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: #1f2833;
+            --primary-color: #45a29e;
+            --secondary-color: #66fcf1;
+            --text-color: #c5c6c7;
+            --text-muted: #8892b0;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --primary-gradient: linear-gradient(135deg, #45a29e 0%, #66fcf1 100%);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h2 { margin: 0; }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Folder Explorer Specific Styles */
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .explorer-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+            height: calc(100vh - 120px);
+        }
+
+        .folder-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .folder-card {
+            background: rgba(30, 38, 56, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-card.active {
+            background: rgba(40, 50, 75, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .folder-card:hover {
+            background: rgba(40, 50, 75, 0.6);
+        }
+
+        .folder-icon-large {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+        .folder-card.active .folder-icon-large {
+            opacity: 1;
+        }
+
+        .folder-card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .folder-card-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 10px;
+            background: var(--surface-color);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+        }
+
+        .doc-header-card {
+            background: rgba(30, 38, 56, 0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .doc-card {
+            background: rgba(20, 25, 35, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.2s;
+        }
+
+        .doc-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(30, 38, 56, 0.8);
+        }
+
+        .doc-thumbnail {
+            width: 60px;
+            height: 80px;
+            background: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 4px;
+            position: relative;
+        }
+
+        .doc-thumbnail::before {
+            content: "📄";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+
+        .pdf-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 2;
+        }
+
+        .doc-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .doc-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+        }
+        
+        .doc-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .doc-meta-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+        }
+        
+        .doc-meta-label {
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        
+        .doc-meta-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .badge-hollow {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: transparent;
+        }
+        .badge-hollow.verified { color: #10b981; border: 1px solid #10b981; }
+        .badge-hollow.processed { color: #14b8a6; border: 1px solid #14b8a6; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body style="padding: 20px 40px;">
+
+    <div class="breadcrumbs">
+        Logistics Park / Folder Explorer / <span style="color: #fff;" id="bc-folder">All Folders</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 1.5rem; font-weight: 600;">Folder Explorer</h2>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="search-container" style="margin-bottom: 0;">
+                <input type="text" class="search-input" id="search-input" placeholder="Search folders..." style="width: 250px;">
+            </div>
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">
+                Sort by ⌄
+            </div>
+            <div class="icon-btn" style="border-radius: 8px;">⋮</div>
+        </div>
+    </div>
+
+    <div class="explorer-layout">
+        <!-- Left: Folders -->
+        <div class="folder-grid" id="embed-folder-grid">
+            <div style="display: flex; background: rgba(30, 38, 56, 0.4); border-radius: 8px; padding: 4px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="flex: 1; text-align: center; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: white;">⊞ Grid</div>
+                <div style="flex: 1; text-align: center; padding: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">≣ List</div>
+            </div>
+            <div id="folder-list-container">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Right: Documents -->
+        <div class="document-list">
+            <div style="margin-bottom: 10px;">
+                <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 4px;" id="right-panel-title">Select a Folder</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">Sorted, sequenced documents</div>
+            </div>
+            
+            <div id="embed-doc-list">
+                <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                    <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">📁</div>
+                    Click on a folder on the left to view its extracted documents.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        async function fetchExplorerData() {
+            try {
+                const res = await fetch(`${API_BASE}/documents`);
+                if(!res.ok) throw new Error('API Error');
+                
+                const docs = await res.json();
+                const validDocs = docs.filter(d => d.folder_path);
+                
+                if (validDocs.length === 0) {
+                    // Injecting dummy folders for testing/demonstration since the API is empty
+                    renderFolders([
+                        { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
+                        { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
+                        { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
+                    ]);
+                    return;
+                }
+                
+                renderFolders(validDocs);
+            } catch (e) {
+                console.error(e);
+                // Fallback Mock Data
+                renderFolders([
+                    { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
+                    { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
+                ]);
+            }
+        }
+
+        function renderFolders(folders) {
+            const container = document.getElementById('folder-list-container');
+            container.innerHTML = '';
+            
+            folders.forEach((folder, idx) => {
+                const title = folder.folder_path.split('/').pop() || folder.folder_path;
+                container.innerHTML += `
+                    <div class="folder-card ${idx === 0 ? 'active' : ''}" onclick="selectFolder(this, '${title}', '${folder.container_no}')">
+                        <div class="folder-icon-large">📁</div>
+                        <div class="folder-card-title">${folder.container_no}</div>
+                        <div class="folder-card-meta">${title.substring(0, 10)}</div>
+                    </div>
+                `;
+            });
+
+            // Auto-select first folder
+            if(folders.length > 0) {
+                selectFolder(container.querySelector('.folder-card'), folders[0].folder_path.split('/').pop() || folders[0].folder_path, folders[0].container_no);
+            }
+        }
+
+        function selectFolder(el, folderPath, containerNo) {
+            document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            document.getElementById('bc-folder').innerText = containerNo;
+            document.getElementById('right-panel-title').innerText = `${folderPath.substring(0, 10)} | Container: ${containerNo}`;
+            
+            const docList = document.getElementById('embed-doc-list');
+            docList.innerHTML = `
+                <div class="doc-header-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5rem; opacity: 0.7;">📁</div>
+                        <div>
+                            <div style="font-weight: 600;">${folderPath.substring(0, 10)} | Container: ${containerNo}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">4 Files extracted by AI</div>
+                        </div>
+                    </div>
+                    <div style="color: var(--text-muted); cursor: pointer;">⌄</div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
+                    <div class="doc-info">
+                        <div class="doc-title">01_GatePass.pdf</div>
+                        <div class="doc-meta-grid">
+                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Gate Pass</span></div>
+                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">1.2 MB</span></div>
+                        </div>
+                    </div>
+                    <div class="doc-actions">
+                        <span class="badge-hollow verified">Verified</span>
+                        <div class="icon-btn">👁️</div>
+                        <div class="icon-btn">⬇️</div>
+                    </div>
+                </div>
+                
+                <div class="doc-card">
+                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
+                    <div class="doc-info">
+                        <div class="doc-title">02_CommercialInvoice.pdf</div>
+                        <div class="doc-meta-grid">
+                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Invoice</span></div>
+                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">2.4 MB</span></div>
+                        </div>
+                    </div>
+                    <div class="doc-actions">
+                        <span class="badge-hollow processed">Processed</span>
+                        <div class="icon-btn">👁️</div>
+                        <div class="icon-btn">⬇️</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        fetchExplorerData();
+
+        // Real-time WebSocket connection
+        function initWebSocket() {
+            const ws = new WebSocket('ws://localhost:8000/ws');
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === 'DOCUMENT_PROCESSED') {
+                        console.log("New document processed, refreshing embedded widget...");
+                        fetchExplorerData();
+                    }
+                } catch(e) { console.error(e); }
+            };
+            ws.onclose = () => {
+                // Reconnect after 5s
+                setTimeout(initWebSocket, 5000);
+            };
+        }
+        initWebSocket();
+    </script>
+</body>
+</html>

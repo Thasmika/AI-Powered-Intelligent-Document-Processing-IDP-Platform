@@ -40,8 +40,9 @@ The core logic is divided into three functional phases governed by LangGraph:
 
 ### Website REST API & Frontend UI Integration (`src/api/routes.py`)
 - Provides REST APIs in FastAPI to sync data with the EFL Portal.
-- **Frontend UI Components**: Requires building a Master Data Grid (Dashboard), a **Folder Explorer View with Search Bar** (allows users to search by date/container details to find and open the system-generated folders like `YYYY-MM-DD_Container-[ContainerNumber]_GP-[GatePassID]/`), a Document Workspace (PDF viewer + metadata), and an Exception Dashboard for the DLQ.
+- **Frontend UI Components**: Requires building a Master Data Grid (Dashboard), a **Folder Explorer View with Search Bar** (allows users to search by date/container details to find and open the system-generated folders like `YYYY-MM-DD_Container-[ContainerNumber]_GP-[GatePassID]/`), a Document Workspace (PDF viewer + metadata), and an Exception Dashboard for the DLQ. The UI implements a modern, premium "deep dark" aesthetic with glowing elements, and is branded for "Logistics Park (Pvt) Limited" under the EFL GLOBAL IDP suite.
 - **AI Assistance Chat Bot**: An integrated chatbot on the website that is linked to all system features. Users can ask questions to get information about the IDP system or query specific document statuses.
+- **AI Report Generator**: A dedicated view where users can use natural language prompts to generate custom tabular reports (e.g., exception summaries, processing volume, missing documents) and export them as CSV or PDF.
 - **Security**: Implements JWT/OAuth2 authentication to secure sensitive endpoints.
 - Webhooks / REST endpoints ensure documents can be queried via perfect metadata seconds after scanning.
 
@@ -69,8 +70,9 @@ The core logic is divided into three functional phases governed by LangGraph:
 - [ ] **Phase 6: Website REST API, Security & Frontend UI Integration**
   - [ ] Create secured API routes in `src/api/routes.py` (JWT/OAuth2)
   - [ ] Implement Webhook/REST sync for the EFL portal connection
-  - [ ] Frontend: Develop Container Dashboard (Master Data Grid)
-  - [ ] Frontend: Develop Folder Explorer View with Search Bar (Search by date/container to find and open specific container folders)
+  - [x] Frontend: Develop Main Dashboard (KPI Summaries) and Container Dashboard with a premium dark theme
+  - [x] Frontend: Develop Folder Explorer View with context-specific detailed search bar
+  - [x] Frontend: Develop AI Report Generator (Conversational UI for custom data generation)
   - [ ] Frontend: Develop Document Workspace (Detail View with embedded PDF viewer)
   - [ ] Frontend: Develop Exception Dashboard (HITL interface for DLQ)
   - [ ] Frontend & Backend: Integrate AI Assistance Chat Bot (System-aware RAG bot to answer user queries and interact with system features)

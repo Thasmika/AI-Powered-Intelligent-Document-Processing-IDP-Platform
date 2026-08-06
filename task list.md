@@ -7,29 +7,29 @@
   - [x] Set up `docker-compose.yml` (PostgreSQL, FastAPI)
   - [x] Initialize basic project structure (`src/main.py`, `src/database/`, `src/agents/`)
   - [x] Update `requirements.txt` with OpenCV, ZBar, Azure AI, LangGraph, etc.
-- [ ] Phase 3: OCR, QR Code Engine & Document Processing Prototype
+- [x] Phase 3: OCR, QR Code Engine & Document Processing Prototype
   - [x] Implement `src/agents/splitter_agent.py` (PDF batch splitting logic)
-  - [ ] Implement `src/agents/qr_agent.py` (QR reading and JSON validation)
-  - [ ] Implement `src/agents/classification_agent.py` (Azure Document Intelligence)
-- [ ] Phase 4: AI Agent Development (LangGraph Orchestration & FastApi)
-  - [ ] Implement `src/agents/intake_agent.py` (Scanner input simulation)
-  - [ ] Implement `src/agents/validation_agent.py` (Cross-reference and WMS/ERP sync logic)
-  - [ ] Build the LangGraph state machine (`src/agents/graph.py`)
-  - [ ] Implement Dead-Letter Queue (DLQ) / Exception routing in graph
-- [ ] Phase 5: Folder Management, Sequence Logic & Blob Storage integration
-  - [ ] Implement `src/agents/folder_engine.py` (Generate date-based folders)
-  - [ ] Integrate with Azure Blob Storage
-- [ ] Phase 6: Website REST API, Security & Frontend UI Integration
-  - [ ] Create secured API routes in `src/api/routes.py` (JWT/OAuth2)
-  - [ ] Implement Webhook/REST sync for EFL portal
-  - [ ] Frontend: Develop Container Dashboard (Master Data Grid)
-  - [ ] Frontend: Develop Folder Explorer View with Search Bar (Search by date/container to find and open specific container folders)
-  - [ ] Frontend: Develop Document Workspace (Detail View with embedded PDF viewer)
-  - [ ] Frontend: Develop Exception Dashboard (HITL interface for DLQ)
-  - [ ] Frontend & Backend: Integrate AI Assistance Chat Bot (System-aware RAG bot to answer user queries and interact with system features)
-- [ ] Phase 7: User Acceptance Testing (UAT) & Performance Testing
-  - [ ] Run test batches to verify folder creation and sequencing
-  - [ ] Perform load testing for high-volume scanner ingestion
-- [ ] Phase 8: Production Deployment, Training & Continuous Monitoring
-  - [ ] Finalize deployment configurations
-  - [ ] Set up Application Insights / Telemetry for monitoring agent performance
+  - [x] Implement `src/agents/qr_agent.py` (QR reading and JSON validation)
+  - [x] Implement `src/agents/classification_agent.py` (Azure Document Intelligence)
+- [x] Phase 4: AI Agent Development (LangGraph Orchestration & FastApi)
+  - [x] Implement `src/agents/intake_agent.py` (Scanner input simulation)
+  - [x] Implement `src/agents/validation_agent.py` (Cross-reference and WMS/ERP sync logic)
+  - [x] Build the LangGraph state machine (`src/agents/graph.py`)
+  - [x] Implement Dead-Letter Queue (DLQ) / Exception routing in graph
+- [x] Phase 5: Folder Management, Sequence Logic & Blob Storage integration
+  - [x] Implement `src/agents/folder_engine.py` (Generate date-based folders)
+  - [x] Integrate with Azure Blob Storage
+- [x] Phase 6: Website REST API, Security & Frontend UI Integration
+  - [x] Create secured API routes in `src/api/routes.py` (JWT/OAuth2)
+  - [x] Implement Webhook/REST sync for EFL portal
+  - [x] Frontend: Develop Container Dashboard (Master Data Grid)
+  - [x] Frontend: Develop Folder Explorer View with Search Bar (Search by date/container to find and open specific container folders)
+  - [x] Frontend: Develop Document Workspace (Detail View with embedded PDF viewer)
+  - [x] Frontend: Develop Exception Dashboard (HITL interface for DLQ)
+  - [x] Frontend & Backend: Integrate AI Assistance Chat Bot (System-aware RAG bot to answer user queries and interact with system features)
+- [x] Phase 7: User Acceptance Testing (UAT) & Performance Testing
+  - [x] Run test batches to verify folder creation and sequencing
+  - [x] Perform load testing for high-volume scanner ingestion
+- [x] Phase 8: Production Deployment, Training & Continuous Monitoring
+  - [x] Finalize deployment configurations
+  - [x] Set up Application Insights / Telemetry for monitoring agent performance

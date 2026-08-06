@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFL Global IDP Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: rgba(20, 25, 45, 0.6);
+            --primary-gradient: linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%);
+            --primary-color: #3b82f6;
+            --text-color: #ffffff;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 40%, rgba(30, 58, 138, 0.2), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(88, 28, 135, 0.15), transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            line-height: 1.5;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Glassmorphism utility */
+        .glass {
+            background: var(--surface-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: #0d121c;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            padding: 30px 24px;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            padding: 0 15px;
+        }
+
+        .nav-item {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+
+        .nav-item.active {
+            background: #2563eb;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            padding: 25px 40px;
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px 40px 100px 40px;
+            overflow-y: auto;
+        }
+
+        /* View Containers */
+        .view {
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .kpi-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(20, 25, 40, 0.7);
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .kpi-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0.15;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Data Grid / Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: transparent;
+        }
+
+        .badge.valid { color: #10b981; border: 1px solid #10b981; }
+        .badge.warning { color: #f59e0b; border: 1px solid #f59e0b; }
+        .badge.error { color: #ef4444; border: 1px solid #ef4444; }
+        .badge.processing { color: #3b82f6; border: 1px solid #3b82f6; }
+
+        /* Actions */
+        .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            box-shadow: none;
+        }
+        
+        .btn-outline:hover {
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: none;
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Chat Bot */
+        .chat-widget {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 380px;
+            background: var(--surface-color);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .chat-header {
+            padding: 18px 24px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .message.bot {
+            background-color: rgba(255, 255, 255, 0.05);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            background: var(--primary-gradient);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .chat-input {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            z-index: 999;
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+        
+        .chat-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* Folder Explorer Specific Styles */
+        .explorer-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 24px;
+            height: calc(100vh - 170px);
+        }
+
+        .folder-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .folder-card {
+            background: rgba(30, 38, 56, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-card.active {
+            background: rgba(40, 50, 75, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .folder-icon-large {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .folder-card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .folder-card-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* List View Modifier for Folder Cards */
+        .list-view .folder-card {
+            flex-direction: row;
+            padding: 12px 15px;
+            align-items: center;
+            text-align: left;
+        }
+        
+        .list-view .folder-icon-large {
+            font-size: 2rem;
+            margin-bottom: 0;
+            margin-right: 15px;
+        }
+
+        .list-view .folder-card-title {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .list-view .folder-card-meta {
+            margin-left: auto;
+            font-size: 0.7rem;
+        }
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .doc-header-card {
+            background: rgba(30, 38, 56, 0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .doc-card {
+            background: rgba(20, 25, 35, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.2s;
+        }
+
+        .doc-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(30, 38, 56, 0.8);
+        }
+
+        .doc-card.active-doc {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+
+        .doc-thumbnail {
+            width: 60px;
+            height: 80px;
+            background: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 4px;
+            position: relative;
+        }
+
+        .doc-thumbnail::before {
+            content: "📄";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+
+        .pdf-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 2;
+        }
+
+        .doc-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .doc-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+        }
+        
+        .doc-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .doc-meta-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+        }
+        
+        .doc-meta-label {
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        
+        .doc-meta-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .badge-hollow {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: transparent;
+        }
+        .badge-hollow.verified { color: #10b981; border: 1px solid #10b981; }
+        .badge-hollow.processed { color: #14b8a6; border: 1px solid #14b8a6; }
+
+        /* Top Header specific */
+        .top-search-bar {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 16px;
+            border-radius: 8px;
+            width: 500px;
+            color: white;
+            font-family: inherit;
+        }
+        .filter-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div><span style="color: #ffffff; font-weight: 600;">EFL</span><span style="font-weight: 400; font-size: 0.9rem; line-height: 1.1; margin-left: 5px; opacity: 0.9;">GLOBAL IDP</span></div>
+            <div style="font-size: 0.65rem; font-weight: 300; opacity: 0.5; margin-top: 4px; letter-spacing: 0.5px;">Logistics Park (Pvt) Limited</div>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item" onclick="switchView('main-dashboard')">
+                <span style="font-size: 1.2rem; opacity: 0.7;">⊞</span> Dashboard
+            </div>
+            <div class="nav-item active" onclick="switchView('explorer')">
+                <span style="font-size: 1.2rem;">📁</span> Folder Explorer
+            </div>
+            <div class="nav-item" onclick="switchView('container-dashboard')">
+                <span style="font-size: 1.2rem; opacity: 0.7;">⚙️</span> Processing <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;">⌄</span>
+            </div>
+            <div class="nav-item" onclick="switchView('reports')">
+                <span style="font-size: 1.2rem; opacity: 0.7;">📄</span> Reports <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;">⌄</span>
+            </div>
+            <div class="nav-item" onclick="switchView('exceptions')">
+                <span style="font-size: 1.2rem; opacity: 0.7;">⚙️</span> Admin <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;">⌄</span>
+            </div>
+            <div style="margin-top: 20px;" class="nav-item" onclick="switchView('profile')">
+                <span style="font-size: 1.2rem; opacity: 0.7;">👤</span> User Profile
+            </div>
+            <div class="nav-item">
+                <span style="font-size: 1.2rem; opacity: 0.7;">❓</span> Help
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header" style="padding: 20px 30px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
+            <!-- Default Header Left (Hidden on Explorer) -->
+            <div id="default-header-left" style="display: none; align-items: center; gap: 20px; flex: 1;">
+                <h1 id="page-title" style="font-size: 1.5rem; margin: 0;">System ID ⌄</h1>
+            </div>
+
+            <!-- Explorer Header Left (Shown only on Explorer) -->
+            <div id="explorer-header-left" style="display: flex; flex-direction: column; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="position: relative;">
+                        <input type="text" class="top-search-bar" placeholder="Search by Date (DD/MM/YYYY), Container ID, BOL, Status...">
+                        <span style="position: absolute; right: 15px; top: 10px; color: var(--text-muted);">🔍</span>
+                    </div>
+                    <button class="filter-btn">
+                        <span>Filter</span>
+                    </button>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; align-items: center;">
+                    Searching for: 
+                    <span style="background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 12px; margin: 0 8px; color: #fff; border: 1px solid rgba(255,255,255,0.1);">15/10/2023</span> 
+                    <span style="background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 12px; color: #fff; border: 1px solid rgba(255,255,255,0.1);">Container TGHU789123 ✕</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="position: relative; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 1.1rem;">🔔</span>
+                    <span style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: #ccc; border-radius: 50%; overflow: hidden;">
+                        <img src="https://i.pravatar.cc/100?img=11" id="header-profile-img" alt="User" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; font-size: 0.9rem; color: white;">Alex Thompson</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">IDP Manager</span>
+                    </div>
+                </div>
+                <div style="font-size: 1.2rem; color: var(--text-muted); cursor: pointer; margin-left: 10px;">⚙️</div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            
+            <!-- View: Main Dashboard -->
+            <div id="view-main-dashboard" class="view active">
+                
+                <!-- Hero Section for First Impression -->
+                <div class="hero-section" style="position: relative; width: 100%; height: 280px; border-radius: 16px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <!-- Images for Carousel -->
+                    <img class="hero-img active" src="ai_warehouse_logistics_1785997903219.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; transition: opacity 1.5s ease-in-out; filter: brightness(0.6);">
+                    <img class="hero-img" src="container_arrival_1785998407874.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.5s ease-in-out; filter: brightness(0.6);">
+                    <img class="hero-img" src="unloading_packages_1785998435153.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.5s ease-in-out; filter: brightness(0.6);">
+                    
+                    <!-- Overlay Content -->
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(11, 12, 16, 0.95) 0%, rgba(11, 12, 16, 0.6) 40%, transparent 100%); display: flex; flex-direction: column; justify-content: center; padding: 0 50px; z-index: 2;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <div style="width: 8px; height: 8px; background: var(--success-color); border-radius: 50%; box-shadow: 0 0 10px var(--success-color); animation: pulse 2s infinite;"></div>
+                            <span style="color: var(--success-color); font-weight: 600; font-size: 0.85rem; letter-spacing: 2px;">LIVE AI MONITORING ACTIVE</span>
+                        </div>
+                        <h2 style="font-size: 2.8rem; font-weight: 700; color: white; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1;">Real-Time<br><span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Processing</span></h2>
+                        <p style="font-size: 1.05rem; color: rgba(255, 255, 255, 0.7); max-width: 450px; line-height: 1.6;">Welcome to the automated nervous system of Logistics Park. Our AI agents are continuously monitoring, extracting, and organizing global shipping documents.</p>
+                    </div>
+                </div>
+
+                <!-- KPI Summary Cards -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
+                    <!-- Card 1 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(0, 255, 255, 0.4); box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Containers</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-total">62,380</div>
+                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+5.2%</div>
+                        <span class="kpi-icon">📦</span>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Documents</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-docs">1.4M</div>
+                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+8.1%</div>
+                        <span class="kpi-icon">📄</span>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(168, 85, 247, 0.5); box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Folders</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-folders">45,190</div>
+                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+3.7%</div>
+                        <span class="kpi-icon">📁</span>
+                    </div>
+                    
+                    <!-- Card 4 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(16, 185, 129, 0.5); box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Success Rate</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-success">98.6%</div>
+                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+0.4%</div>
+                        <span class="kpi-icon">✅</span>
+                    </div>
+                    <!-- Card 5 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(56, 189, 248, 0.5); box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">In Progress</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-progress">7,455</div>
+                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+12.3%</div>
+                        <span class="kpi-icon">⚙️</span>
+                    </div>
+                    <!-- Card 6 -->
+                    <div class="card kpi-card" style="border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);">
+                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Exceptions</div>
+                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-exceptions">3,211</div>
+                        <div style="color: var(--danger-color); font-size: 0.875rem; font-weight: 600;">-1.9%</div>
+                        <span class="kpi-icon">⚠️</span>
+                    </div>
+                </div>
+
+                <!-- Realtime Analysis Chart -->
+                <div class="card glass" style="margin-bottom: 30px; padding: 24px; background: rgba(15, 20, 35, 0.8);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">Last 48 Hours Analysis</h2>
+                            <div style="color: var(--text-muted); font-size: 0.85rem;">Volume processed vs Extraction Confidence</div>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center; background: rgba(16, 185, 129, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <span style="height:8px; width:8px; background-color:var(--success-color); border-radius:50%; box-shadow: 0 0 8px var(--success-color); animation: pulse 2s infinite;"></span>
+                            <span style="color: var(--success-color); font-size: 0.75rem; font-weight: 600;">LIVE</span>
+                        </div>
+                    </div>
+                    <div style="height: 300px; width: 100%;">
+                        <canvas id="analysisChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Processing Activity Table -->
+                <div class="card glass" style="background: rgba(15, 20, 35, 0.8); border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 24px;">
+                        <h2 style="font-size: 0.875rem; letter-spacing: 1px; color: var(--text-color);">RECENT PROCESSING ACTIVITY</h2>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <span style="color: var(--success-color); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;">LIVE UPDATES ACTIVE</span>
+                            <span style="height:10px; width:10px; background-color:var(--success-color); border-radius:50%; box-shadow: 0 0 8px var(--success-color); animation: pulse 2s infinite;"></span>
+                            <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 10px;">15 new entries</span>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Status ↕</th>
+                                    <th>Document ID ↕</th>
+                                    <th>Source ↕</th>
+                                    <th>Date/Time ↕</th>
+                                    <th>Extraction Type ↕</th>
+                                    <th>Confidence ↕</th>
+                                    <th>Priority ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge valid">SUCCESS</span></td>
+                                    <td style="color: var(--text-muted);">INV-98314</td>
+                                    <td style="color: var(--text-muted);">Email</td>
+                                    <td style="color: var(--text-muted);">12:44:01 PM</td>
+                                    <td style="color: var(--text-muted);">Invoice</td>
+                                    <td style="color: var(--text-muted);">99.1%</td>
+                                    <td style="color: var(--text-muted);">High</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge processing">PROCESSING</span></td>
+                                    <td style="color: var(--text-muted);">DOC-57201</td>
+                                    <td style="color: var(--text-muted);">Sharepoint</td>
+                                    <td style="color: var(--text-muted);">12:43:45 PM</td>
+                                    <td style="color: var(--text-muted);">Contract</td>
+                                    <td style="color: var(--text-muted);">75%</td>
+                                    <td style="color: var(--text-muted);">Medium 🔄</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge valid">SUCCESS</span></td>
+                                    <td style="color: var(--text-muted);">INV-98314</td>
+                                    <td style="color: var(--text-muted);">S3 Bucket</td>
+                                    <td style="color: var(--text-muted);">12:43:45 PM</td>
+                                    <td style="color: var(--text-muted);">Contract Type</td>
+                                    <td style="color: var(--text-muted);">98.5%</td>
+                                    <td style="color: var(--text-muted);">Low</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge warning">ALERT</span></td>
+                                    <td style="color: var(--text-muted);">REP-11004</td>
+                                    <td style="color: var(--text-muted);">S3 Bucket</td>
+                                    <td style="color: var(--text-muted);">12:43:20 PM</td>
+                                    <td style="color: var(--text-muted);">Report</td>
+                                    <td style="color: var(--text-muted);">88.5%</td>
+                                    <td style="color: var(--text-muted);">Validation required</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Container Dashboard -->
+            <div id="view-container-dashboard" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <div style="display: flex; flex-direction: column;">
+                            <h2>Recent Processed Gate Passes</h2>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top: 5px;">
+                                <span style="height:8px; width:8px; background-color:var(--success-color); border-radius:50%; display:inline-block; animation: pulse 2s infinite;"></span>
+                                <span id="last-updated" style="color: var(--text-muted); font-size: 0.75rem;">Live updates active</span>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="fetchDocuments()">Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Container No</th>
+                                <th>Gate Pass No</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-table-body">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View: Explorer -->
+            <div id="view-explorer" class="view">
+                <div class="breadcrumbs">
+                    Home / Folder Explorer / <span style="color: #fff;">15-OCT-2023</span> / Container: TGHU789123-A
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600;">Folder Explorer</h2>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">
+                            Sort by ⌄
+                        </div>
+                        <div class="icon-btn" style="border-radius: 8px;">⋮</div>
+                    </div>
+                </div>
+
+                <div class="explorer-layout">
+                    <!-- Left: Folders -->
+                    <div class="folder-grid">
+                        <div style="display: flex; background: rgba(30, 38, 56, 0.4); border-radius: 8px; padding: 4px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div id="btn-grid-view" onclick="toggleFolderView('grid')" style="flex: 1; text-align: center; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: white;">⊞ Grid</div>
+                            <div id="btn-list-view" onclick="toggleFolderView('list')" style="flex: 1; text-align: center; padding: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">≣ List</div>
+                        </div>
+
+                        <!-- Populated dynamically by JS -->
+                        <div id="folder-list-container"></div>
+                    </div>
+
+                    <!-- Right: Documents -->
+                    <div class="document-list">
+                        <!-- Header Box -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 4px;" id="right-panel-title">Select a Folder</div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem;">Sorted, sequenced documents</div>
+                        </div>
+                        
+                        <div id="embed-doc-list">
+                            <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                                <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">📁</div>
+                                Click on a folder on the left to view its extracted documents.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Exceptions -->
+            <div id="view-exceptions" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Dead-Letter Queue (DLQ)</h2>
+                        <button class="btn" onclick="fetchExceptions()">Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Container No</th>
+                                <th>Error Reason</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exceptions-table-body">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View: Scanning -->
+            <div id="view-scanning" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Document Scanning Process</h2>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="margin-bottom: 20px; color: var(--text-muted);">Connect to a local hardware scanner or printer to acquire documents.</p>
+                        
+                        <!-- Scanner Connection UI -->
+                        <div id="scanner-connect-ui" style="border: 2px solid var(--border-color); padding: 40px; text-align: center; border-radius: 8px; background-color: rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🖨️</div>
+                            <h3 style="margin-bottom: 10px;" id="scanner-status-title">Hardware Scanner Disconnected</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;" id="scanner-status-desc">Click below to detect and connect to a local printer/scanner.</p>
+                            
+                            <div style="display: flex; justify-content: center; gap: 10px;">
+                                <button class="btn btn-outline" id="connect-scanner-btn" onclick="connectScanner()">Detect & Connect Scanner</button>
+                                <button class="btn" id="start-scan-btn" onclick="startHardwareScan()" disabled style="display: none;">Start Hardware Scan</button>
+                            </div>
+                        </div>
+
+                        <!-- Hardware Scan Stats (Analytics) -->
+                        <div id="scan-analytics" style="display: none; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                             <div class="card" style="padding: 15px; text-align: center;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Pages Scanned</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="stat-pages">0</div>
+                             </div>
+                             <div class="card" style="padding: 15px; text-align: center;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Est. Size</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="stat-size">0.0 MB</div>
+                             </div>
+                             <div class="card" style="padding: 15px; text-align: center;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Connection Quality</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success-color);">Excellent</div>
+                             </div>
+                        </div>
+                        
+                        <!-- Visual Processing Area -->
+                        <div id="processing-area" style="display: none;">
+                            <h4 style="margin-bottom: 10px;">Hardware Scanning & Processing Status</h4>
+                            <div style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span id="processing-status-text">Initializing...</span>
+                                    <span id="processing-percent">0%</span>
+                                </div>
+                                <div style="width: 100%; background-color: var(--surface-color); border-radius: 4px; height: 10px; overflow: hidden;">
+                                    <div id="processing-bar" style="height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.5s ease;"></div>
+                                </div>
+                                
+                                <ul id="processing-steps" style="list-style: none; padding: 0; margin-top: 20px; color: var(--text-muted); font-size: 0.875rem; display: flex; flex-direction: column; gap: 8px;">
+                                    <li id="step-1" style="display: flex; align-items: center; gap: 10px;"><span class="step-icon">⏳</span> <span>Scanning physical pages...</span></li>
+                                    <li id="step-2" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Uploading to system...</span></li>
+                                    <li id="step-3" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Extracting text & Validating...</span></li>
+                                    <li id="step-4" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Saving to Storage...</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            <!-- View: Reports (AI Report Generator) -->
+            <div id="view-reports" class="view">
+                <div class="card" style="display: flex; flex-direction: column; height: 75vh; padding: 0;">
+                    <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding: 20px;">
+                        <h2 style="display: flex; align-items: center; gap: 10px;">✨ AI Report Generator</h2>
+                        <p style="color: var(--text-muted); margin-top: 5px; font-size: 0.9rem;">Ask the AI to generate any custom report from your processed document data.</p>
+                    </div>
+                    
+                    <div id="ai-report-chat" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; background: rgba(0,0,0,0.2);">
+                        <!-- Initial AI Message -->
+                        <div style="display: flex; gap: 15px;">
+                            <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🤖</div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; border-top-left-radius: 0; max-width: 80%; border: 1px solid rgba(255,255,255,0.1);">
+                                <p style="margin-bottom: 10px;">Hello! I'm your IDP Reporting Assistant. You can ask me to generate custom reports based on your container and document data.</p>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Try asking something like:</p>
+                                <ul style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; padding-left: 20px;">
+                                    <li>"Generate a report of all containers with exceptions this week."</li>
+                                    <li>"Show me processing volume by document type for October."</li>
+                                    <li>"Create a summary of total gate passes missing commercial invoices."</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 20px; border-top: 1px solid var(--border-color); background: var(--surface-color);">
+                        <div style="display: flex; gap: 15px; position: relative;">
+                            <input type="text" id="ai-report-input" placeholder="Describe the report you want to generate..." onkeypress="if(event.key === 'Enter') generateAIReport()" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 25px; color: white; font-size: 1rem; padding-right: 130px;">
+                            <button class="btn" onclick="generateAIReport()" style="position: absolute; right: 8px; top: 8px; bottom: 8px; border-radius: 20px; padding: 0 20px; display: flex; align-items: center; gap: 8px;">
+                                <span>Generate</span> ✨
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: User Profile -->
+            <div id="view-profile" class="view">
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: start;">
+                    
+                    <!-- Left: Profile Summary -->
+                    <div class="card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px;">
+                        <div style="position: relative; margin-bottom: 20px;">
+                            <div style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--primary-color); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+                                <input type="file" id="profileImageUpload" style="display: none;" accept="image/*" onchange="updateProfilePicture(this)">
+                                <img id="main-profile-img" src="https://i.pravatar.cc/150?img=11" alt="Alex Thompson" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div style="position: absolute; bottom: 5px; right: 5px; background: var(--primary-gradient); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5);" onclick="document.getElementById('profileImageUpload').click()">✏️</div>
+                        </div>
+                        
+                        <h2 style="font-size: 1.5rem; margin-bottom: 5px;">Alex Thompson</h2>
+                        <div style="color: var(--primary-color); font-weight: 600; margin-bottom: 15px; font-size: 0.9rem;">Senior IDP Manager</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">
+                            Managing document processing and automated extraction workflows at Logistics Park (Pvt) Limited.
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <button class="btn" style="flex: 1;" onclick="alert('Profile details updated successfully!')">Update Profile</button>
+                            <button class="btn btn-outline" style="flex: 1;" onclick="alert('Logging out of IDP System...')">Log Out</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Profile Details -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        
+                        <!-- Account Details -->
+                        <div class="card">
+                            <div class="card-header" style="margin-bottom: 20px;">
+                                <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">👤 Account Information</h3>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0 24px 24px 24px;">
+                                <div>
+                                    <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Full Name</label>
+                                    <input type="text" value="Alex Thompson" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Email Address</label>
+                                    <input type="text" value="alex.thompson@logisticspark.com" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Role</label>
+                                    <input type="text" value="Administrator" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Department</label>
+                                    <input type="text" value="Operations & IT" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- System Settings -->
+                        <div class="card">
+                            <div class="card-header" style="margin-bottom: 20px;">
+                                <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">⚙️ Preferences & Security</h3>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 15px; padding: 0 24px 24px 24px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <div>
+                                        <div style="font-weight: 500; margin-bottom: 4px;">Email Notifications</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-muted);">Receive daily exception reports (DLQ) directly to your inbox.</div>
+                                    </div>
+                                    <div style="width: 40px; height: 20px; background: var(--success-color); border-radius: 10px; position: relative; cursor: pointer;" onclick="toggleSwitch(this)">
+                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <div>
+                                        <div style="font-weight: 500; margin-bottom: 4px;">Two-Factor Authentication (2FA)</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-muted);">Require an authentication code when logging in from unknown devices.</div>
+                                    </div>
+                                    <div style="width: 40px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; cursor: pointer;" onclick="toggleSwitch(this)">
+                                        <div style="position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; background: var(--text-muted); border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: 500; margin-bottom: 4px;">Dark Theme</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-muted);">System-wide dark mode interface.</div>
+                                    </div>
+                                    <div style="width: 40px; height: 20px; background: var(--success-color); border-radius: 10px; position: relative; cursor: pointer;" onclick="toggleSwitch(this)">
+                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Chat Bot Toggle -->
+    <div class="chat-toggle" onclick="toggleChat()">🤖</div>
+    
+    <!-- AI Chat Bot Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-header">
+            <span>AI Assistant</span>
+            <span style="cursor:pointer" onclick="toggleChat()">✕</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">Hello! I am the EFL Global IDP Assistant. How can I help you check container statuses today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" class="search-input" id="chatInput" placeholder="Ask a question..." onkeypress="handleChat(event)">
+                                <button class="btn" onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        const TOKEN = 'dummy-jwt-token';
+        
+        // Handle Profile Picture Update
+        function updateProfilePicture(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('main-profile-img').src = e.target.result;
+                    document.getElementById('header-profile-img').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Initialize WebSocket for real-time updates
+        function connectWebSocket() {
+            const wsUrl = `ws://${window.location.hostname}:${window.location.port || 8000}/api/v1/ws`;
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log("🟢 Connected to Real-Time IDP AI Engine");
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'DOCUMENT_PROCESSED') {
+                        console.log("Document Processed Event:", message.data);
+                        
+                        // Dynamically refresh the current view
+                        const activeViewId = Array.from(document.querySelectorAll('.view')).find(el => el.classList.contains('active'))?.id;
+                        
+                        if (activeViewId === 'view-container-dashboard') fetchDocuments();
+                        if (activeViewId === 'view-exceptions') fetchExceptions();
+                        if (activeViewId === 'view-explorer') fetchExplorerData();
+                        
+                        // We could also show a small toast notification here
+                    }
+                } catch (e) {
+                    console.error("Error parsing websocket message", e);
+                }
+            };
+            
+            ws.onclose = function() {
+                console.log("🔴 Disconnected from Real-Time IDP. Reconnecting...");
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        // Start connection on load
+        connectWebSocket();
+
+        // Hero Carousel Logic
+        let currentHeroImage = 0;
+        function rotateHeroImages() {
+            const images = document.querySelectorAll('.hero-img');
+            if(images.length === 0) return;
+            images.forEach(img => img.style.opacity = '0');
+            currentHeroImage = (currentHeroImage + 1) % images.length;
+            images[currentHeroImage].style.opacity = '1';
+        }
+        setInterval(rotateHeroImages, 5000);
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+            
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            
+            const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick') && el.getAttribute('onclick').includes(`switchView('${viewName}')`));
+            if (activeNav) activeNav.classList.add('active');
+            
+            const titles = {
+                'main-dashboard': 'Main Dashboard',
+                'container-dashboard': 'Container Dashboard',
+                'explorer': 'Folder Explorer',
+                'exceptions': 'Exceptions (DLQ)',
+                'scanning': 'Scanning Process',
+                'reports': 'AI Report Generator',
+                'profile': 'User Profile'
+            };
+            document.getElementById('page-title').innerText = titles[viewName] || 'System ID ⌄';
+            
+            // Toggle Header Search Bar Visibility
+            if (viewName === 'explorer') {
+                document.getElementById('default-header-left').style.display = 'none';
+                document.getElementById('explorer-header-left').style.display = 'flex';
+            } else {
+                document.getElementById('default-header-left').style.display = 'flex';
+                document.getElementById('explorer-header-left').style.display = 'none';
+            }
+            
+            if(viewName === 'container-dashboard') fetchDocuments();
+            if(viewName === 'exceptions') fetchExceptions();
+            if(viewName === 'explorer') fetchExplorerData();
+        }
+
+        async function triggerIngestion() {
+            try {
+                const res = await fetch(`${API_BASE}/trigger-ingestion`, {
+                    method: 'POST',
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                const data = await res.json();
+                alert(data.message);
+                setTimeout(fetchDocuments, 1000);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function fetchDocuments() {
+            try {
+                const res = await fetch(`${API_BASE}/documents`, {
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                const docs = await res.json();
+                renderTable('dashboard-table-body', docs);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        async function fetchExceptions() {
+            try {
+                const res = await fetch(`${API_BASE}/documents/exceptions`, {
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                const docs = await res.json();
+                
+                const tbody = document.getElementById('exceptions-table-body');
+                tbody.innerHTML = '';
+                docs.forEach(doc => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${doc.id}</td>
+                            <td>${doc.container_no}</td>
+                            <td style="color:var(--danger-color)">${doc.error_message || 'Validation Failed'}</td>
+                            <td><button class="btn btn-outline">Review (HITL)</button></td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        // Folder View Toggle
+        function toggleFolderView(mode) {
+            const container = document.getElementById('folder-list-container');
+            const btnGrid = document.getElementById('btn-grid-view');
+            const btnList = document.getElementById('btn-list-view');
+            
+            if (mode === 'list') {
+                container.classList.add('list-view');
+                btnList.style.background = 'rgba(255,255,255,0.1)';
+                btnList.style.color = 'white';
+                btnList.style.borderRadius = '6px';
+                btnGrid.style.background = 'transparent';
+                btnGrid.style.color = 'var(--text-muted)';
+            } else {
+                container.classList.remove('list-view');
+                btnGrid.style.background = 'rgba(255,255,255,0.1)';
+                btnGrid.style.color = 'white';
+                btnGrid.style.borderRadius = '6px';
+                btnList.style.background = 'transparent';
+                btnList.style.color = 'var(--text-muted)';
+            }
+        }
+
+        async function fetchExplorerData() {
+            try {
+                const res = await fetch(`${API_BASE}/documents`, {
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                const docs = await res.json();
+                
+                const validDocs = docs.filter(d => d.folder_path);
+                
+                if (validDocs.length === 0) {
+                    renderFolders([
+                        { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
+                        { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
+                        { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
+                    ]);
+                    return;
+                }
+                
+                renderFolders(validDocs);
+            } catch (e) {
+                console.error(e);
+                renderFolders([
+                    { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
+                    { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
+                    { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
+                ]);
+            }
+        }
+
+        function renderFolders(folders) {
+            const container = document.getElementById('folder-list-container');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            folders.forEach((folder, idx) => {
+                const title = folder.folder_path.split('/').pop() || folder.folder_path;
+                container.innerHTML += `
+                    <div class="folder-card ${idx === 0 ? 'active' : ''}" onclick="selectFolder(this, '${title}', '${folder.container_no}')">
+                        <div class="folder-icon-large">📁</div>
+                        <div class="folder-card-title">${folder.container_no}</div>
+                        <div class="folder-card-meta">${title.substring(0, 10)}</div>
+                    </div>
+                `;
+            });
+
+            if(folders.length > 0) {
+                selectFolder(container.querySelector('.folder-card'), folders[0].folder_path.split('/').pop() || folders[0].folder_path, folders[0].container_no);
+            }
+        }
+
+        function selectFolder(el, folderPath, containerNo) {
+            document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            const bc = document.getElementById('bc-folder');
+            if(bc) bc.innerText = containerNo;
+            
+            const docList = document.getElementById('embed-doc-list');
+            if(!docList) return;
+            
+            docList.innerHTML = `
+                <div class="doc-header-card">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5rem; opacity: 0.7;">📁</div>
+                        <div>
+                            <div style="font-weight: 600;">${folderPath.substring(0, 10)} | Container: ${containerNo}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Extracted Files</div>
+                        </div>
+                    </div>
+                    <div style="color: var(--text-muted); cursor: pointer;">⌄</div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
+                    <div class="doc-info">
+                        <div class="doc-title">01_GatePass.pdf</div>
+                        <div class="doc-meta-grid">
+                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Gate Pass</span></div>
+                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">1.2 MB</span></div>
+                        </div>
+                    </div>
+                    <div class="doc-actions">
+                        <span class="badge-hollow verified">Verified</span>
+                        <div class="icon-btn">👁️</div>
+                        <div class="icon-btn">⬇️</div>
+                    </div>
+                </div>
+                
+                <div class="doc-card">
+                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
+                    <div class="doc-info">
+                        <div class="doc-title">02_CommercialInvoice.pdf</div>
+                        <div class="doc-meta-grid">
+                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Invoice</span></div>
+                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">2.4 MB</span></div>
+                        </div>
+                    </div>
+                    <div class="doc-actions">
+                        <span class="badge-hollow processed">Processed</span>
+                        <div class="icon-btn">👁️</div>
+                        <div class="icon-btn">⬇️</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTable(tbodyId, docs) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            
+            docs.forEach(doc => {
+                let statusClass = 'valid';
+                if(doc.status === 'WARNING') statusClass = 'warning';
+                if(doc.status === 'ERROR') statusClass = 'error';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${doc.id}</td>
+                        <td>${doc.container_no}</td>
+                        <td>${doc.gate_pass_no}</td>
+                        <td><span class="badge ${statusClass}">${doc.status}</span></td>
+                        <td><button class="btn btn-outline" onclick="alert('Opening Workspace for ${doc.id}')">View</button></td>
+                    </tr>
+                `;
+            });
+        }
+        
+        function toggleChat() {
+            const w = document.getElementById('chatWidget');
+            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        let analysisChart;
+        function initAnalysisChart() {
+            const ctx = document.getElementById('analysisChart');
+            if(!ctx) return;
+            
+            // Generate some initial fake data for the last 48 hours
+            const labels = Array.from({length: 48}, (_, i) => `-${48-i}h`);
+            const volumeData = Array.from({length: 48}, () => Math.floor(Math.random() * 50) + 20);
+            const successRate = Array.from({length: 48}, () => Math.floor(Math.random() * 10) + 90);
+
+            analysisChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Volume Processed',
+                            data: volumeData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Avg Confidence (%)',
+                            data: successRate,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', maxTicksLimit: 12 }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Documents', color: '#94a3b8' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#10b981' },
+                            min: 50,
+                            max: 100,
+                            title: { display: true, text: 'Confidence %', color: '#10b981' }
+                        }
+                    }
+                }
+            });
+
+            // Simulate real-time updates every 3 seconds
+            setInterval(() => {
+                // Remove oldest data point
+                analysisChart.data.labels.shift();
+                analysisChart.data.datasets[0].data.shift();
+                analysisChart.data.datasets[1].data.shift();
+
+                // Add new data point
+                analysisChart.data.labels.push('Now');
+                analysisChart.data.datasets[0].data.push(Math.floor(Math.random() * 50) + 20);
+                analysisChart.data.datasets[1].data.push(Math.floor(Math.random() * 10) + 90);
+
+                // Re-label to keep "-Xh" format for older points (simplified just setting all but last)
+                for(let i=0; i<47; i++) {
+                    analysisChart.data.labels[i] = `-${48-i}h`;
+                }
+
+                analysisChart.update('none'); // Update without full animation for smoother feel
+                
+                // Update KPI randomly
+                document.getElementById('kpi-docs').innerText = (1.4 + Math.random() * 0.01).toFixed(3) + 'M';
+            }, 3000);
+        }
+
+        // Call init chart when script loads
+        setTimeout(initAnalysisChart, 500);
+        
+        function handleChat(e) {
+            if(e.key === 'Enter') sendChatMessage();
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            const messages = document.getElementById('chatMessages');
+            messages.innerHTML += `<div class="message user">${msg}</div>`;
+            input.value = '';
+            
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+            
+            // Mock bot response
+            setTimeout(() => {
+                messages.innerHTML += `<div class="message bot">I can see that. Based on the IDP data, all containers for today have been processed. Is there a specific container number you want me to look up?</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }, 1000);
+        }
+
+        async function connectScanner() {
+            const connectBtn = document.getElementById('connect-scanner-btn');
+            const title = document.getElementById('scanner-status-title');
+            const desc = document.getElementById('scanner-status-desc');
+            const startBtn = document.getElementById('start-scan-btn');
+            
+            connectBtn.disabled = true;
+            connectBtn.innerText = 'Detecting Hardware...';
+            title.innerText = 'Searching for local devices...';
+            desc.innerText = 'Please ensure the scanner is turned on and connected.';
+            
+            await new Promise(r => setTimeout(r, 2000));
+            
+            connectBtn.style.display = 'none';
+            title.innerText = 'Scanner Connected ✅';
+            title.style.color = 'var(--success-color)';
+            desc.innerText = 'Epson WorkForce Pro (USB) - Ready to scan.';
+            startBtn.style.display = 'inline-block';
+            startBtn.disabled = false;
+        }
+
+        async function startHardwareScan() {
+            const startBtn = document.getElementById('start-scan-btn');
+            const analytics = document.getElementById('scan-analytics');
+            const processingArea = document.getElementById('processing-area');
+            const processingBar = document.getElementById('processing-bar');
+            const processingText = document.getElementById('processing-status-text');
+            const processingPercent = document.getElementById('processing-percent');
+            const statPages = document.getElementById('stat-pages');
+            const statSize = document.getElementById('stat-size');
+            
+            startBtn.disabled = true;
+            startBtn.innerText = 'Scanning...';
+            
+            analytics.style.display = 'grid';
+            processingArea.style.display = 'block';
+            processingBar.style.width = '0%';
+            processingPercent.innerText = '0%';
+            processingBar.style.backgroundColor = 'var(--primary-color)';
+            
+            for(let i=1; i<=4; i++) {
+                const step = document.getElementById(`step-${i}`);
+                step.style.opacity = '0.5';
+                step.querySelector('.step-icon').innerText = '⏳';
+            }
+            
+            // Step 1: Physical Scan
+            document.getElementById('step-1').style.opacity = '1';
+            document.getElementById('step-1').querySelector('.step-icon').innerText = '🔄';
+            processingText.innerText = 'Warming up scanner...';
+            
+            await new Promise(r => setTimeout(r, 1000));
+            processingText.innerText = 'Scanning physical pages...';
+            
+            // Animate pages count
+            let pages = 0;
+            let size = 0.0;
+            let interval = setInterval(() => {
+                pages += 1;
+                size += 1.2;
+                statPages.innerText = pages;
+                statSize.innerText = size.toFixed(1) + ' MB';
+                processingBar.style.width = Math.min(30, (pages / 10) * 30) + '%';
+                processingPercent.innerText = Math.min(30, Math.floor((pages / 10) * 30)) + '%';
+                if(pages >= 8) clearInterval(interval);
+            }, 400);
+            
+            await new Promise(r => setTimeout(r, 4000)); // wait for scan to simulate
+            
+            document.getElementById('step-1').querySelector('.step-icon').innerText = '✅';
+            
+            // Step 2: Upload
+            document.getElementById('step-2').style.opacity = '1';
+            document.getElementById('step-2').querySelector('.step-icon').innerText = '🔄';
+            processingText.innerText = 'Uploading to system...';
+            processingBar.style.width = '50%';
+            processingPercent.innerText = '50%';
+            
+            await new Promise(r => setTimeout(r, 1500));
+            document.getElementById('step-2').querySelector('.step-icon').innerText = '✅';
+            
+            // Step 3: Extract & Validate
+            document.getElementById('step-3').style.opacity = '1';
+            document.getElementById('step-3').querySelector('.step-icon').innerText = '🔄';
+            processingText.innerText = 'Extracting text & Validating...';
+            processingBar.style.width = '80%';
+            processingPercent.innerText = '80%';
+            
+            await new Promise(r => setTimeout(r, 2000));
+            document.getElementById('step-3').querySelector('.step-icon').innerText = '✅';
+            
+            // Step 4: Storage
+            document.getElementById('step-4').style.opacity = '1';
+            document.getElementById('step-4').querySelector('.step-icon').innerText = '🔄';
+            processingText.innerText = 'Saving to Storage...';
+            processingBar.style.width = '95%';
+            processingPercent.innerText = '95%';
+            
+            await new Promise(r => setTimeout(r, 1000));
+            document.getElementById('step-4').querySelector('.step-icon').innerText = '✅';
+            
+            // Finish
+            processingBar.style.width = '100%';
+            processingPercent.innerText = '100%';
+            processingBar.style.backgroundColor = 'var(--success-color)';
+            processingText.innerText = 'Hardware Scan & Processing Complete!';
+            
+            setTimeout(() => {
+                startBtn.innerText = 'Start Another Scan';
+                startBtn.disabled = false;
+                setTimeout(() => {
+                    processingArea.style.display = 'none';
+                    analytics.style.display = 'none';
+                    statPages.innerText = '0';
+                    statSize.innerText = '0.0 MB';
+                }, 4000);
+            }, 1000);
+        }
+
+        // Simulate real-time dashboard updates
+        setInterval(() => {
+            if (document.getElementById('view-main-dashboard').classList.contains('active')) {
+                let totalStr = document.getElementById('kpi-total').innerText.replace(/,/g, '');
+                let total = parseInt(totalStr);
+                let docs = parseInt(document.getElementById('kpi-docs').innerText.replace(/,/g, ''));
+                let folders = parseInt(document.getElementById('kpi-folders').innerText.replace(/,/g, ''));
+                let inProgress = parseInt(document.getElementById('kpi-progress').innerText);
+                
+                // Randomly update numbers
+                if (Math.random() > 0.6) {
+                    let added = Math.floor(Math.random() * 3);
+                    total += added;
+                    folders += added;
+                    docs += added * (Math.floor(Math.random() * 3) + 2); // 2-4 docs per container
+                    
+                    inProgress = Math.max(10, inProgress + Math.floor(Math.random() * 5) - 2);
+                    
+                    document.getElementById('kpi-total').innerText = total.toLocaleString();
+                    document.getElementById('kpi-docs').innerText = docs.toLocaleString();
+                    document.getElementById('kpi-folders').innerText = folders.toLocaleString();
+                    document.getElementById('kpi-progress').innerText = inProgress;
+                    document.getElementById('last-updated').innerText = 'Updated just now';
+                    
+                    setTimeout(() => {
+                        document.getElementById('last-updated').innerText = 'Live updates active';
+                    }, 2000);
+                }
+            }
+        }, 3500);
+
+        // Init
+        fetchDocuments();
+
+        // AI Report Generator Logic
+        function generateAIReport() {
+            const input = document.getElementById('ai-report-input');
+            const chat = document.getElementById('ai-report-chat');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            // User message
+            chat.innerHTML += `
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); padding: 15px 20px; border-radius: 12px; border-top-right-radius: 0; max-width: 80%;">
+                        ${msg}
+                    </div>
+                    <div style="width: 40px; height: 40px; background: #ccc; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                        <img src="https://i.pravatar.cc/100?img=11" alt="User" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Bot generating message
+            const loadingId = 'loading-' + Date.now();
+            chat.innerHTML += `
+                <div id="${loadingId}" style="display: flex; gap: 15px;">
+                    <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🤖</div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; border-top-left-radius: 0; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+                        ✨ Analyzing data and generating your report...
+                    </div>
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Mock API response after 2.5 seconds
+            setTimeout(() => {
+                const loader = document.getElementById(loadingId);
+                if(loader) loader.remove();
+                chat.innerHTML += `
+                    <div style="display: flex; gap: 15px;">
+                        <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🤖</div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border-top-left-radius: 0; max-width: 85%; border: 1px solid rgba(255,255,255,0.1); width: 100%;">
+                            <p style="margin-bottom: 15px; color: var(--success-color); font-weight: 600;">✅ Report Generated Successfully!</p>
+                            <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem;">Here is the custom exception report based on current system data:</p>
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 20px;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                                    <thead style="background: rgba(255,255,255,0.05);">
+                                        <tr>
+                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Container</th>
+                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Status</th>
+                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Exceptions Found</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">TGHU789123</td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge warning" style="padding: 4px 8px; font-size: 0.75rem;">Missing Invoice</span></td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">1</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">MSKU123456</td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge error" style="padding: 4px 8px; font-size: 0.75rem;">Unreadable BOL</span></td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">2</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">OOCU987654</td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge warning" style="padding: 4px 8px; font-size: 0.75rem;">Date Mismatch</span></td>
+                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">1</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" style="font-size: 0.85rem; padding: 8px 15px;">📥 Download CSV</button>
+                                <button class="btn btn-outline" style="font-size: 0.85rem; padding: 8px 15px;">📄 Export PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chat.scrollTop = chat.scrollHeight;
+            }, 2500);
+        }
+        function toggleSwitch(element) {
+            const isOff = element.style.background.includes('rgba') || element.style.background.includes('0.1');
+            const circle = element.children[0];
+            if (isOff) {
+                element.style.background = 'var(--success-color)';
+                circle.style.left = 'auto';
+                circle.style.right = '2px';
+                circle.style.background = 'white';
+            } else {
+                element.style.background = 'rgba(255, 255, 255, 0.1)';
+                circle.style.right = 'auto';
+                circle.style.left = '2px';
+                circle.style.background = 'var(--text-muted)';
+            }
+        }
+
+        // Real-time WebSocket connection
+        function initWebSocket() {
+            const ws = new WebSocket('ws://localhost:8000/ws');
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === 'DOCUMENT_PROCESSED') {
+                        console.log("New document processed, refreshing data...");
+                        fetchExplorerData();
+                    }
+                } catch(e) { console.error(e); }
+            };
+            ws.onclose = () => {
+                // Reconnect after 5s
+                setTimeout(initWebSocket, 5000);
+            };
+        }
+        initWebSocket();
+    </script>
+</body>
+</html>
