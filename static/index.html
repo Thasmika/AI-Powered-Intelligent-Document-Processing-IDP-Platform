@@ -99,7 +99,7 @@
 
         .nav-item.active {
             background: #2563eb;
-            color: white;
+            color: var(--text-color);
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
         }
@@ -249,7 +249,7 @@
         /* Actions */
         .btn {
             background: var(--primary-gradient);
-            color: white;
+            color: var(--text-color);
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
@@ -297,7 +297,7 @@
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background-color: rgba(0, 0, 0, 0.2);
-            color: white;
+            color: var(--text-color);
             font-family: inherit;
             transition: all 0.2s;
         }
@@ -330,7 +330,7 @@
         .chat-header {
             padding: 18px 24px;
             background: var(--primary-gradient);
-            color: white;
+            color: var(--text-color);
             border-radius: 16px 16px 0 0;
             display: flex;
             justify-content: space-between;
@@ -383,7 +383,7 @@
             height: 56px;
             border-radius: 28px;
             background: var(--primary-gradient);
-            color: white;
+            color: var(--text-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -441,7 +441,7 @@
         .folder-card-title {
             font-weight: 600;
             font-size: 1.1rem;
-            color: #fff;
+            color: var(--text-color);
             margin-bottom: 4px;
         }
 
@@ -538,7 +538,7 @@
 
         .pdf-badge {
             background: #ef4444;
-            color: white;
+            color: var(--text-color);
             font-size: 0.6rem;
             font-weight: bold;
             padding: 2px 6px;
@@ -556,7 +556,7 @@
         .doc-title {
             font-weight: 600;
             font-size: 1rem;
-            color: #fff;
+            color: var(--text-color);
         }
         
         .doc-meta-grid {
@@ -578,7 +578,7 @@
         }
         
         .doc-meta-value {
-            color: #fff;
+            color: var(--text-color);
             font-weight: 500;
         }
 
@@ -604,7 +604,7 @@
         
         .icon-btn:hover {
             background: rgba(255,255,255,0.1);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .badge-hollow {
@@ -625,7 +625,7 @@
             padding: 10px 16px;
             border-radius: 8px;
             width: 500px;
-            color: white;
+            color: var(--text-color);
             font-family: inherit;
         }
         .filter-btn {
@@ -633,7 +633,7 @@
             border: 1px solid rgba(255,255,255,0.1);
             padding: 8px 16px;
             border-radius: 8px;
-            color: white;
+            color: var(--text-color);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -656,10 +656,10 @@
             <div style="font-size: 0.65rem; font-weight: 300; opacity: 0.5; margin-top: 4px; letter-spacing: 0.5px;">Logistics Park (Pvt) Limited</div>
         </div>
         <div class="nav-items">
-            <div class="nav-item" onclick="switchView('main-dashboard')">
+            <div class="nav-item active" onclick="switchView('main-dashboard')">
                 <span style="font-size: 1.2rem; opacity: 0.7;">⊞</span> Dashboard
             </div>
-            <div class="nav-item active" onclick="switchView('explorer')">
+            <div class="nav-item" onclick="switchView('explorer')">
                 <span style="font-size: 1.2rem;">📁</span> Folder Explorer
             </div>
             <div class="nav-item" onclick="switchView('container-dashboard')">
@@ -699,11 +699,7 @@
                         <span>Filter</span>
                     </button>
                 </div>
-                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; align-items: center;">
-                    Searching for: 
-                    <span style="background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 12px; margin: 0 8px; color: #fff; border: 1px solid rgba(255,255,255,0.1);">15/10/2023</span> 
-                    <span style="background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 12px; color: #fff; border: 1px solid rgba(255,255,255,0.1);">Container TGHU789123 ✕</span>
-                </div>
+                <div id="search-tags-container" style="display: none; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; align-items: center;">Searching for: </div>
             </div>
             
             <div style="display: flex; align-items: center; gap: 20px;">
@@ -711,12 +707,12 @@
                     <span style="font-size: 1.1rem;">🔔</span>
                     <span style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div onclick="switchView('profile')" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
                     <div style="width: 40px; height: 40px; background: #ccc; border-radius: 50%; overflow: hidden;">
                         <img src="https://i.pravatar.cc/100?img=11" id="header-profile-img" alt="User" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-weight: 600; font-size: 0.9rem; color: white;">Alex Thompson</span>
+                        <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-color);">Alex Thompson</span>
                         <span style="font-size: 0.75rem; color: var(--text-muted);">IDP Manager</span>
                     </div>
                 </div>
@@ -742,7 +738,7 @@
                             <div style="width: 8px; height: 8px; background: var(--success-color); border-radius: 50%; box-shadow: 0 0 10px var(--success-color); animation: pulse 2s infinite;"></div>
                             <span style="color: var(--success-color); font-weight: 600; font-size: 0.85rem; letter-spacing: 2px;">LIVE AI MONITORING ACTIVE</span>
                         </div>
-                        <h2 style="font-size: 2.8rem; font-weight: 700; color: white; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1;">Real-Time<br><span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Processing</span></h2>
+                        <h2 style="font-size: 2.8rem; font-weight: 700; color: var(--text-color); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1;">Real-Time<br><span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Processing</span></h2>
                         <p style="font-size: 1.05rem; color: rgba(255, 255, 255, 0.7); max-width: 450px; line-height: 1.6;">Welcome to the automated nervous system of Logistics Park. Our AI agents are continuously monitoring, extracting, and organizing global shipping documents.</p>
                     </div>
                 </div>
@@ -909,9 +905,7 @@
 
             <!-- View: Explorer -->
             <div id="view-explorer" class="view">
-                <div class="breadcrumbs">
-                    Home / Folder Explorer / <span style="color: #fff;">15-OCT-2023</span> / Container: TGHU789123-A
-                </div>
+                
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2 style="font-size: 1.5rem; font-weight: 600;">Folder Explorer</h2>
@@ -927,7 +921,7 @@
                     <!-- Left: Folders -->
                     <div class="folder-grid">
                         <div style="display: flex; background: rgba(30, 38, 56, 0.4); border-radius: 8px; padding: 4px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                            <div id="btn-grid-view" onclick="toggleFolderView('grid')" style="flex: 1; text-align: center; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: white;">⊞ Grid</div>
+                            <div id="btn-grid-view" onclick="toggleFolderView('grid')" style="flex: 1; text-align: center; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-color);">⊞ Grid</div>
                             <div id="btn-list-view" onclick="toggleFolderView('list')" style="flex: 1; text-align: center; padding: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">≣ List</div>
                         </div>
 
@@ -1061,10 +1055,29 @@
                     
                     <div style="padding: 20px; border-top: 1px solid var(--border-color); background: var(--surface-color);">
                         <div style="display: flex; gap: 15px; position: relative;">
-                            <input type="text" id="ai-report-input" placeholder="Describe the report you want to generate..." onkeypress="if(event.key === 'Enter') generateAIReport()" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 25px; color: white; font-size: 1rem; padding-right: 130px;">
+                            <input type="text" id="ai-report-input" placeholder="Describe the report you want to generate..." onkeypress="if(event.key === 'Enter') generateAIReport()" style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 25px; color: var(--text-color); font-size: 1rem; padding-right: 130px;">
                             <button class="btn" onclick="generateAIReport()" style="position: absolute; right: 8px; top: 8px; bottom: 8px; border-radius: 20px; padding: 0 20px; display: flex; align-items: center; gap: 8px;">
                                 <span>Generate</span> ✨
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <!-- View: Settings -->
+            <div id="view-settings" class="view">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>?? Settings</h2>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p>User settings and preferences.</p>
+                        <div style="margin-top: 20px; display: flex; align-items: center; gap: 15px;">
+                            <span>Theme:</span>
+                            <div style="width: 50px; height: 26px; background: var(--overlay-10); border-radius: 13px; position: relative; cursor: pointer; transition: all 0.3s;" onclick="toggleSwitch(this, 'darkMode')">
+                                <div style="width: 22px; height: 22px; background: var(--text-color); border-radius: 50%; position: absolute; left: 2px; top: 2px; transition: all 0.3s;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1108,19 +1121,19 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0 24px 24px 24px;">
                                 <div>
                                     <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Full Name</label>
-                                    <input type="text" value="Alex Thompson" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                    <input type="text" value="Alex Thompson" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-color);">
                                 </div>
                                 <div>
                                     <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Email Address</label>
-                                    <input type="text" value="alex.thompson@logisticspark.com" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                    <input type="text" value="alex.thompson@logisticspark.com" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-color);">
                                 </div>
                                 <div>
                                     <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Role</label>
-                                    <input type="text" value="Administrator" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                    <input type="text" value="Administrator" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-color);">
                                 </div>
                                 <div>
                                     <label style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase;">Department</label>
-                                    <input type="text" value="Operations & IT" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+                                    <input type="text" value="Operations & IT" class="search-input" style="width: 100%; padding: 10px 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-color);">
                                 </div>
                             </div>
                         </div>
@@ -1138,7 +1151,7 @@
                                         <div style="font-size: 0.85rem; color: var(--text-muted);">Receive daily exception reports (DLQ) directly to your inbox.</div>
                                     </div>
                                     <div style="width: 40px; height: 20px; background: var(--success-color); border-radius: 10px; position: relative; cursor: pointer;" onclick="toggleSwitch(this)">
-                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: var(--surface-color); border-radius: 50%;"></div>
                                     </div>
                                 </div>
                                 
@@ -1158,7 +1171,7 @@
                                         <div style="font-size: 0.85rem; color: var(--text-muted);">System-wide dark mode interface.</div>
                                     </div>
                                     <div style="width: 40px; height: 20px; background: var(--success-color); border-radius: 10px; position: relative; cursor: pointer;" onclick="toggleSwitch(this)">
-                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+                                        <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: var(--surface-color); border-radius: 50%;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1780,7 +1793,7 @@
             if(!msg) return;
             
             // User message
-            chat.innerHTML += `
+            chat.insertAdjacentHTML('beforeend', `
                 <div style="display: flex; gap: 15px; justify-content: flex-end;">
                     <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); padding: 15px 20px; border-radius: 12px; border-top-right-radius: 0; max-width: 80%;">
                         ${msg}
@@ -1795,7 +1808,7 @@
             
             // Bot generating message
             const loadingId = 'loading-' + Date.now();
-            chat.innerHTML += `
+            chat.insertAdjacentHTML('beforeend', `
                 <div id="${loadingId}" style="display: flex; gap: 15px;">
                     <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🤖</div>
                     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; border-top-left-radius: 0; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
@@ -1809,7 +1822,7 @@
             setTimeout(() => {
                 const loader = document.getElementById(loadingId);
                 if(loader) loader.remove();
-                chat.innerHTML += `
+                chat.insertAdjacentHTML('beforeend', `
                     <div style="display: flex; gap: 15px;">
                         <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🤖</div>
                         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border-top-left-radius: 0; max-width: 85%; border: 1px solid rgba(255,255,255,0.1); width: 100%;">
