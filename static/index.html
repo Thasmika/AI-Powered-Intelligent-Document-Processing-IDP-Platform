@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EFL Global IDP Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
@@ -645,6 +646,58 @@
             color: var(--text-muted);
             margin-bottom: 20px;
         }
+
+        /* Markdown Report Styles */
+        .markdown-report {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-color);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        .markdown-report h1, .markdown-report h2, .markdown-report h3 {
+            color: #60a5fa;
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+            font-weight: 600;
+        }
+        .markdown-report h1 { font-size: 1.6rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .markdown-report h2 { font-size: 1.3rem; }
+        .markdown-report h3 { font-size: 1.1rem; }
+        .markdown-report p { margin-bottom: 1em; }
+        .markdown-report ul, .markdown-report ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        .markdown-report li { margin-bottom: 0.5em; }
+        .markdown-report strong { color: #f8fafc; font-weight: 600; }
+        .markdown-report table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .markdown-report th, .markdown-report td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .markdown-report th {
+            background: rgba(59, 130, 246, 0.1);
+            color: #93c5fd;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        .markdown-report tr:hover td {
+            background-color: rgba(255,255,255,0.02);
+        }
+        .markdown-report tr:last-child td {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -662,9 +715,7 @@
             <div class="nav-item" onclick="switchView('explorer')">
                 <span style="font-size: 1.2rem;">📁</span> Folder Explorer
             </div>
-            <div class="nav-item" onclick="switchView('container-dashboard')">
-                <span style="font-size: 1.2rem; opacity: 0.7;">⚙️</span> Processing <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;">⌄</span>
-            </div>
+
             <div class="nav-item" onclick="switchView('reports')">
                 <span style="font-size: 1.2rem; opacity: 0.7;">📄</span> Reports <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;">⌄</span>
             </div>
@@ -724,7 +775,6 @@
             
             <!-- View: Main Dashboard -->
             <div id="view-main-dashboard" class="view active">
-                
                 <!-- Hero Section for First Impression -->
                 <div class="hero-section" style="position: relative; width: 100%; height: 280px; border-radius: 16px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
                     <!-- Images for Carousel -->
@@ -738,143 +788,12 @@
                             <div style="width: 8px; height: 8px; background: var(--success-color); border-radius: 50%; box-shadow: 0 0 10px var(--success-color); animation: pulse 2s infinite;"></div>
                             <span style="color: var(--success-color); font-weight: 600; font-size: 0.85rem; letter-spacing: 2px;">LIVE AI MONITORING ACTIVE</span>
                         </div>
-                        <h2 style="font-size: 2.8rem; font-weight: 700; color: var(--text-color); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1;">Real-Time<br><span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Processing</span></h2>
+                        <h2 style="font-size: 2.8rem; font-weight: 700; color: var(--text-color); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1;">Real-Time<br><span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Document Processing</span></h2>
                         <p style="font-size: 1.05rem; color: rgba(255, 255, 255, 0.7); max-width: 450px; line-height: 1.6;">Welcome to the automated nervous system of Logistics Park. Our AI agents are continuously monitoring, extracting, and organizing global shipping documents.</p>
                     </div>
                 </div>
 
-                <!-- KPI Summary Cards -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px;">
-                    <!-- Card 1 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(0, 255, 255, 0.4); box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Containers</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-total">62,380</div>
-                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+5.2%</div>
-                        <span class="kpi-icon">📦</span>
-                    </div>
-                    <!-- Card 2 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Documents</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-docs">1.4M</div>
-                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+8.1%</div>
-                        <span class="kpi-icon">📄</span>
-                    </div>
-                    <!-- Card 3 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(168, 85, 247, 0.5); box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Total Folders</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-folders">45,190</div>
-                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+3.7%</div>
-                        <span class="kpi-icon">📁</span>
-                    </div>
-                    
-                    <!-- Card 4 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(16, 185, 129, 0.5); box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Success Rate</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-success">98.6%</div>
-                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+0.4%</div>
-                        <span class="kpi-icon">✅</span>
-                    </div>
-                    <!-- Card 5 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(56, 189, 248, 0.5); box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">In Progress</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-progress">7,455</div>
-                        <div style="color: var(--success-color); font-size: 0.875rem; font-weight: 600;">+12.3%</div>
-                        <span class="kpi-icon">⚙️</span>
-                    </div>
-                    <!-- Card 6 -->
-                    <div class="card kpi-card" style="border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);">
-                        <div style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 12px;">Exceptions</div>
-                        <div style="font-size: 3.5rem; font-weight: 700; line-height: 1; margin-bottom: 8px;" id="kpi-exceptions">3,211</div>
-                        <div style="color: var(--danger-color); font-size: 0.875rem; font-weight: 600;">-1.9%</div>
-                        <span class="kpi-icon">⚠️</span>
-                    </div>
-                </div>
-
-                <!-- Realtime Analysis Chart -->
-                <div class="card glass" style="margin-bottom: 30px; padding: 24px; background: rgba(15, 20, 35, 0.8);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <div>
-                            <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">Last 48 Hours Analysis</h2>
-                            <div style="color: var(--text-muted); font-size: 0.85rem;">Volume processed vs Extraction Confidence</div>
-                        </div>
-                        <div style="display:flex; gap:10px; align-items:center; background: rgba(16, 185, 129, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                            <span style="height:8px; width:8px; background-color:var(--success-color); border-radius:50%; box-shadow: 0 0 8px var(--success-color); animation: pulse 2s infinite;"></span>
-                            <span style="color: var(--success-color); font-size: 0.75rem; font-weight: 600;">LIVE</span>
-                        </div>
-                    </div>
-                    <div style="height: 300px; width: 100%;">
-                        <canvas id="analysisChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Recent Processing Activity Table -->
-                <div class="card glass" style="background: rgba(15, 20, 35, 0.8); border: 1px solid rgba(255,255,255,0.05);">
-                    <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 24px;">
-                        <h2 style="font-size: 0.875rem; letter-spacing: 1px; color: var(--text-color);">RECENT PROCESSING ACTIVITY</h2>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <span style="color: var(--success-color); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;">LIVE UPDATES ACTIVE</span>
-                            <span style="height:10px; width:10px; background-color:var(--success-color); border-radius:50%; box-shadow: 0 0 8px var(--success-color); animation: pulse 2s infinite;"></span>
-                            <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 10px;">15 new entries</span>
-                        </div>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>Status ↕</th>
-                                    <th>Document ID ↕</th>
-                                    <th>Source ↕</th>
-                                    <th>Date/Time ↕</th>
-                                    <th>Extraction Type ↕</th>
-                                    <th>Confidence ↕</th>
-                                    <th>Priority ↕</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><span class="badge valid">SUCCESS</span></td>
-                                    <td style="color: var(--text-muted);">INV-98314</td>
-                                    <td style="color: var(--text-muted);">Email</td>
-                                    <td style="color: var(--text-muted);">12:44:01 PM</td>
-                                    <td style="color: var(--text-muted);">Invoice</td>
-                                    <td style="color: var(--text-muted);">99.1%</td>
-                                    <td style="color: var(--text-muted);">High</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge processing">PROCESSING</span></td>
-                                    <td style="color: var(--text-muted);">DOC-57201</td>
-                                    <td style="color: var(--text-muted);">Sharepoint</td>
-                                    <td style="color: var(--text-muted);">12:43:45 PM</td>
-                                    <td style="color: var(--text-muted);">Contract</td>
-                                    <td style="color: var(--text-muted);">75%</td>
-                                    <td style="color: var(--text-muted);">Medium 🔄</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge valid">SUCCESS</span></td>
-                                    <td style="color: var(--text-muted);">INV-98314</td>
-                                    <td style="color: var(--text-muted);">S3 Bucket</td>
-                                    <td style="color: var(--text-muted);">12:43:45 PM</td>
-                                    <td style="color: var(--text-muted);">Contract Type</td>
-                                    <td style="color: var(--text-muted);">98.5%</td>
-                                    <td style="color: var(--text-muted);">Low</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge warning">ALERT</span></td>
-                                    <td style="color: var(--text-muted);">REP-11004</td>
-                                    <td style="color: var(--text-muted);">S3 Bucket</td>
-                                    <td style="color: var(--text-muted);">12:43:20 PM</td>
-                                    <td style="color: var(--text-muted);">Report</td>
-                                    <td style="color: var(--text-muted);">88.5%</td>
-                                    <td style="color: var(--text-muted);">Validation required</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- View: Container Dashboard -->
-            <div id="view-container-dashboard" class="view">
+                
                 <div class="card">
                     <div class="card-header">
                         <div style="display: flex; flex-direction: column;">
@@ -884,7 +803,10 @@
                                 <span id="last-updated" style="color: var(--text-muted); font-size: 0.75rem;">Live updates active</span>
                             </div>
                         </div>
-                        <button class="btn" onclick="fetchDocuments()">Refresh</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-outline" onclick="triggerIngestion()">Process Pending Scans</button>
+                            <button class="btn" onclick="fetchDocuments()">Refresh</button>
+                        </div>
                     </div>
                     <table>
                         <thead>
@@ -892,6 +814,7 @@
                                 <th>ID</th>
                                 <th>Container No</th>
                                 <th>Gate Pass No</th>
+                                <th>Destination</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -901,8 +824,11 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            
 
+            
+            </div>
+            
             <!-- View: Explorer -->
             <div id="view-explorer" class="view">
                 
@@ -970,66 +896,7 @@
                 </div>
             </div>
 
-            <!-- View: Scanning -->
-            <div id="view-scanning" class="view">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Document Scanning Process</h2>
-                    </div>
-                    <div style="padding: 20px;">
-                        <p style="margin-bottom: 20px; color: var(--text-muted);">Connect to a local hardware scanner or printer to acquire documents.</p>
-                        
-                        <!-- Scanner Connection UI -->
-                        <div id="scanner-connect-ui" style="border: 2px solid var(--border-color); padding: 40px; text-align: center; border-radius: 8px; background-color: rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <div style="font-size: 3rem; margin-bottom: 10px;">🖨️</div>
-                            <h3 style="margin-bottom: 10px;" id="scanner-status-title">Hardware Scanner Disconnected</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 20px;" id="scanner-status-desc">Click below to detect and connect to a local printer/scanner.</p>
-                            
-                            <div style="display: flex; justify-content: center; gap: 10px;">
-                                <button class="btn btn-outline" id="connect-scanner-btn" onclick="connectScanner()">Detect & Connect Scanner</button>
-                                <button class="btn" id="start-scan-btn" onclick="startHardwareScan()" disabled style="display: none;">Start Hardware Scan</button>
-                            </div>
-                        </div>
-
-                        <!-- Hardware Scan Stats (Analytics) -->
-                        <div id="scan-analytics" style="display: none; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                             <div class="card" style="padding: 15px; text-align: center;">
-                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Pages Scanned</div>
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="stat-pages">0</div>
-                             </div>
-                             <div class="card" style="padding: 15px; text-align: center;">
-                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Est. Size</div>
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="stat-size">0.0 MB</div>
-                             </div>
-                             <div class="card" style="padding: 15px; text-align: center;">
-                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Connection Quality</div>
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success-color);">Excellent</div>
-                             </div>
-                        </div>
-                        
-                        <!-- Visual Processing Area -->
-                        <div id="processing-area" style="display: none;">
-                            <h4 style="margin-bottom: 10px;">Hardware Scanning & Processing Status</h4>
-                            <div style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color);">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                    <span id="processing-status-text">Initializing...</span>
-                                    <span id="processing-percent">0%</span>
-                                </div>
-                                <div style="width: 100%; background-color: var(--surface-color); border-radius: 4px; height: 10px; overflow: hidden;">
-                                    <div id="processing-bar" style="height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.5s ease;"></div>
-                                </div>
-                                
-                                <ul id="processing-steps" style="list-style: none; padding: 0; margin-top: 20px; color: var(--text-muted); font-size: 0.875rem; display: flex; flex-direction: column; gap: 8px;">
-                                    <li id="step-1" style="display: flex; align-items: center; gap: 10px;"><span class="step-icon">⏳</span> <span>Scanning physical pages...</span></li>
-                                    <li id="step-2" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Uploading to system...</span></li>
-                                    <li id="step-3" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Extracting text & Validating...</span></li>
-                                    <li id="step-4" style="display: flex; align-items: center; gap: 10px; opacity: 0.5;"><span class="step-icon">⏳</span> <span>Saving to Storage...</span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>            <!-- View: Reports (AI Report Generator) -->
+            <!-- View: Reports (AI Report Generator) -->
             <div id="view-reports" class="view">
                 <div class="card" style="display: flex; flex-direction: column; height: 75vh; padding: 0;">
                     <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding: 20px;">
@@ -1315,6 +1182,31 @@
             }
         }
 
+        async function autoPollIngestion() {
+            try {
+                // Silently trigger background processing of any newly scanned folders
+                await fetch(`${API_BASE}/trigger-ingestion`, {
+                    method: 'POST',
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                
+                // Refresh dashboard data
+                fetchDocuments();
+                fetchExceptions();
+                
+                // If the user is currently looking at the Folder Explorer, refresh it too
+                if(document.getElementById('view-explorer').classList.contains('active')) {
+                    fetchExplorerData();
+                }
+            } catch (e) {
+                console.error("Auto-poll failed:", e);
+            }
+        }
+
+        // Auto-scan and update the system every 30 seconds
+        setInterval(autoPollIngestion, 30000);
+
+
         async function fetchDocuments() {
             try {
                 const res = await fetch(`${API_BASE}/documents`, {
@@ -1337,9 +1229,23 @@
                 const tbody = document.getElementById('exceptions-table-body');
                 tbody.innerHTML = '';
                 docs.forEach(doc => {
+                    // Derive scanner source label
+                    let scannerLabel = doc.gate_pass_no || 'Unknown';
+                    if (doc.folder_path) {
+                        const parts = doc.folder_path.replace(/\\/g, '/').split('/');
+                        const base = parts[parts.length - 1];
+                        if (base) scannerLabel = base;
+                    }
+                    const shortId = doc.id ? doc.id.slice(0, 8) + '…' : '—';
+
                     tbody.innerHTML += `
                         <tr>
-                            <td>${doc.id}</td>
+                            <td>
+                                <div style="display:flex;flex-direction:column;gap:3px">
+                                    <span style="font-size:0.7rem;color:var(--text-muted);font-family:monospace;letter-spacing:0.02em">${shortId}</span>
+                                    <span style="font-size:0.85rem;font-weight:600;color:#93c5fd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px" title="${scannerLabel}">📁 ${scannerLabel}</span>
+                                </div>
+                            </td>
                             <td>${doc.container_no}</td>
                             <td style="color:var(--danger-color)">${doc.error_message || 'Validation Failed'}</td>
                             <td><button class="btn btn-outline">Review (HITL)</button></td>
@@ -1382,24 +1288,24 @@
                 const docs = await res.json();
                 
                 const validDocs = docs.filter(d => d.folder_path);
+                const seen = new Set();
+                const uniqueDocs = validDocs.filter(d => {
+                    if (seen.has(d.folder_path)) return false;
+                    seen.add(d.folder_path);
+                    return true;
+                });
                 
-                if (validDocs.length === 0) {
-                    renderFolders([
-                        { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
-                        { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
-                        { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
-                    ]);
+                if (uniqueDocs.length === 0) {
+                    const container = document.getElementById('folder-list-container');
+                    if(container) container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No documents found</div>';
                     return;
                 }
                 
-                renderFolders(validDocs);
+                renderFolders(uniqueDocs);
             } catch (e) {
                 console.error(e);
-                renderFolders([
-                    { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
-                    { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
-                    { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
-                ]);
+                const container = document.getElementById('folder-list-container');
+                if(container) container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Failed to load documents</div>';
             }
         }
 
@@ -1409,75 +1315,215 @@
             container.innerHTML = '';
             
             folders.forEach((folder, idx) => {
-                const title = folder.folder_path.split('/').pop() || folder.folder_path;
+                const normalizedPath = folder.folder_path.replace(/\\/g, '/');
+                const title = normalizedPath.split('/').pop() || normalizedPath;
+                
+                let gpMatch = title.match(/_GP-(.+?)(?:\/|$)/);
+                let gatePassId = gpMatch ? gpMatch[1] : (folder.gate_pass_no || folder.container_no);
+                gatePassId = String(gatePassId).replace(/^GP-/, '');
+
                 container.innerHTML += `
-                    <div class="folder-card ${idx === 0 ? 'active' : ''}" onclick="selectFolder(this, '${title}', '${folder.container_no}')">
+                    <div class="folder-card ${idx === 0 ? 'active' : ''}" onclick="selectFolder(this, '${title}', '${gatePassId}')">
                         <div class="folder-icon-large">📁</div>
-                        <div class="folder-card-title">${folder.container_no}</div>
+                        <div class="folder-card-title">${gatePassId}</div>
                         <div class="folder-card-meta">${title.substring(0, 10)}</div>
                     </div>
                 `;
             });
 
             if(folders.length > 0) {
-                selectFolder(container.querySelector('.folder-card'), folders[0].folder_path.split('/').pop() || folders[0].folder_path, folders[0].container_no);
+                const firstFolder = folders[0];
+                const normalizedPath = firstFolder.folder_path.replace(/\\/g, '/');
+                const title = normalizedPath.split('/').pop() || normalizedPath;
+                let gpMatch = title.match(/_GP-(.+?)(?:\/|$)/);
+                let gatePassId = gpMatch ? gpMatch[1] : (firstFolder.gate_pass_no || firstFolder.container_no);
+                gatePassId = String(gatePassId).replace(/^GP-/, '');
+                selectFolder(container.querySelector('.folder-card'), title, gatePassId);
             }
         }
 
-        function selectFolder(el, folderPath, containerNo) {
+        async function selectFolder(el, folderPath, gatePassId) {
             document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('active'));
             if(el) el.classList.add('active');
             
             const bc = document.getElementById('bc-folder');
-            if(bc) bc.innerText = containerNo;
+            if(bc) bc.innerText = gatePassId;
             
             const docList = document.getElementById('embed-doc-list');
             if(!docList) return;
             
-            docList.innerHTML = `
-                <div class="doc-header-card">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 2.5rem; opacity: 0.7;">📁</div>
-                        <div>
-                            <div style="font-weight: 600;">${folderPath.substring(0, 10)} | Container: ${containerNo}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Extracted Files</div>
-                        </div>
-                    </div>
-                    <div style="color: var(--text-muted); cursor: pointer;">⌄</div>
-                </div>
+            let pdfsHtml = '';
+            let metadataHtml = '';
+            let indexedDate = '-';
+            let docNo = '-';
 
-                <div class="doc-card">
-                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
-                    <div class="doc-info">
-                        <div class="doc-title">01_GatePass.pdf</div>
-                        <div class="doc-meta-grid">
-                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Gate Pass</span></div>
-                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">1.2 MB</span></div>
+            try {
+                const res = await fetch(`${API_BASE}/documents/${folderPath}/files`, {
+                    headers: {'Authorization': `Bearer ${TOKEN}`}
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    pdfsHtml = data.files.map(pdf => `
+                        <div style="background: #000; border: 1px solid #333; border-radius: 4px; padding: 15px; width: 220px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-sizing: border-box;">
+                            <div style="font-size: 3.5rem;">📄</div>
+                            <div style="color: #e2e8f0; font-size: 0.9rem; text-align: center; word-break: break-all; height: 40px; display: flex; align-items: center;">${pdf.name}</div>
+                            <div style="display: flex; gap: 8px; width: 100%;">
+                                <button onclick="window.open('${API_BASE}/documents/${folderPath}/files/${pdf.name}?token=${TOKEN}', '_blank')" style="background: #eab308; color: #000; border: none; padding: 8px 10px; border-radius: 2px; cursor: pointer; font-size: 0.82rem; flex: 1; font-weight: 600;">👁 View</button>
+                                <a href="${API_BASE}/documents/${folderPath}/files/${pdf.name}?token=${TOKEN}&download=true" download="${pdf.name}" style="background: #1e3a5f; color: #e2e8f0; border: 1px solid #2563eb; padding: 8px 10px; border-radius: 2px; cursor: pointer; font-size: 0.82rem; flex: 1; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box;">⬇ Download</a>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    if (data.metadata) {
+                        const meta = data.metadata;
+                        indexedDate = meta.date_time || meta.Date || meta.date || '-';
+                        docNo = meta.grn_no || '-';
+
+                        const displayFields = [
+                            { key: 'customer', label: 'Customer' },
+                            { key: 'gate_pass_no', label: 'GatePass' },
+                            { key: 'id', label: 'Id', fallbackKey: 'grn_no' },
+                            { key: 'date_time', label: 'DateTime' },
+                            { key: 'grn_no', label: 'GRNNo' }
+                        ];
+
+                        // Strictly display only these 5 fields
+                        for (const field of displayFields) {
+                            let value = meta[field.key] || '';
+                            if (!value && field.fallbackKey) {
+                                value = meta[field.fallbackKey] || '';
+                            }
+                            
+                            // Specific logic for GRNNo to show INBOUND / OUTBOUND based on container_type or raw text
+                            if (field.label === 'GRNNo') {
+                                const typeStr = (meta.container_type || '').toUpperCase() + ' ' + JSON.stringify(meta).toUpperCase();
+                                if (typeStr.includes('INBOUND')) {
+                                    value = 'INBOUND';
+                                } else if (typeStr.includes('OUTBOUND')) {
+                                    value = 'OUTBOUND';
+                                } else {
+                                    value = value || 'INBOUND'; // fallback
+                                }
+                            }
+                            
+                            if (field.label === 'GatePass') {
+                                metadataHtml += `
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="background: #eab308; color: #000; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; width: 110px; flex-shrink: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${field.label}</span>
+                                        <span style="color: #f8fafc; font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${value}">${value}</span>
+                                    </div>
+                                `;
+                            } else {
+                                metadataHtml += `
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="background: rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; width: 110px; flex-shrink: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${field.label}</span>
+                                        <span style="color: #f8fafc; font-size: 0.85rem; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${value}">${value}</span>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+            }
+            if (!pdfsHtml) {
+                pdfsHtml = '<div style="color: #9ca3af; font-size: 0.9rem; padding: 20px;">No PDFs found or failed to load.</div>';
+            }
+            if (!metadataHtml) {
+                metadataHtml = '<div style="color: #9ca3af; font-size: 0.85rem;">No metadata available</div>';
+            }
+            
+            const detailsHtml = `
+                <tr style="border-bottom: 1px solid #333;">
+                    <td style="padding: 15px; vertical-align: top; color: #e2e8f0; font-size: 0.95rem; font-weight: 500;">${docNo}</td>
+                    <td style="padding: 15px; vertical-align: top; color: #94a3b8; font-size: 0.85rem;">
+                        <span style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 8px; border-radius: 4px; font-weight: 600;">GRN_LPPL</span>
+                    </td>
+                    <td style="padding: 15px; vertical-align: top;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px;">
+                            ${metadataHtml}
+                        </div>
+                    </td>
+                    <td style="padding: 15px; vertical-align: top;">
+                        <!-- Wireframe Preview Box -->
+                        <div style="border: 1px solid #4b5563; width: 90px; height: 110px; display: flex; flex-direction: column; background: #000; padding: 4px; box-sizing: border-box; opacity: 0.8;">
+                            <div style="border: 1px solid #4b5563; height: 15px; margin-bottom: 4px;"></div>
+                            <div style="display: flex; gap: 4px; flex: 1; margin-bottom: 4px;">
+                                <div style="border: 1px solid #4b5563; flex: 1;"></div>
+                                <div style="border: 1px solid #4b5563; flex: 1;"></div>
+                            </div>
+                            <div style="border: 1px solid #4b5563; flex: 1.5; margin-bottom: 4px;"></div>
+                            <div style="display: flex; gap: 4px; justify-content: space-around; height: 15px;">
+                                <div style="border: 1px solid #4b5563; border-radius: 50%; width: 15px; height: 15px;"></div>
+                                <div style="border: 1px solid #4b5563; border-radius: 50%; width: 15px; height: 15px;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 15px; vertical-align: top; color: #9ca3af; font-size: 0.95rem;">${indexedDate}</td>
+                </tr>
+            `;
+
+
+
+            docList.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Details Table -->
+                    <div style="background: #000; color: #e2e8f0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border: 1px solid #333; border-radius: 4px;">
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; background: #000;">
+                                <thead style="background: #111; color: #9ca3af; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 1px solid #333;">
+                                    <tr>
+                                        <th style="padding: 15px; font-weight: 600; text-transform: uppercase;">Doc No</th>
+                                        <th style="padding: 15px; font-weight: 600; text-transform: uppercase;">Document Type</th>
+                                        <th style="padding: 15px; font-weight: 600; text-transform: uppercase;">Indexed Data</th>
+                                        <th style="padding: 15px; font-weight: 600; text-transform: uppercase;">Preview</th>
+                                        <th style="padding: 15px; font-weight: 600; text-transform: uppercase;">Indexed Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${detailsHtml}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="doc-actions">
-                        <span class="badge-hollow verified">Verified</span>
-                        <div class="icon-btn">👁️</div>
-                        <div class="icon-btn">⬇️</div>
-                    </div>
-                </div>
-                
-                <div class="doc-card">
-                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
-                    <div class="doc-info">
-                        <div class="doc-title">02_CommercialInvoice.pdf</div>
-                        <div class="doc-meta-grid">
-                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Invoice</span></div>
-                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">2.4 MB</span></div>
+
+                    <!-- Available Documents -->
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                        <h3 style="color: #e2e8f0; font-weight: 500; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 10px; margin-bottom: 20px;">Available Documents</h3>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            ${pdfsHtml}
                         </div>
-                    </div>
-                    <div class="doc-actions">
-                        <span class="badge-hollow processed">Processed</span>
-                        <div class="icon-btn">👁️</div>
-                        <div class="icon-btn">⬇️</div>
                     </div>
                 </div>
             `;
+        }
+
+        function openDocInExplorer(folderPath, gatePassNo, containerNo) {
+            if (!folderPath) {
+                alert('Document is still processing or has no folder path.');
+                return;
+            }
+            
+            const normalizedPath = folderPath.replace(/\\/g, '/');
+            const title = normalizedPath.split('/').pop() || normalizedPath;
+            
+            let gpMatch = title.match(/_GP-(.+?)(?:\/|$)/);
+            let gatePassId = gpMatch ? gpMatch[1] : (gatePassNo || containerNo);
+            gatePassId = String(gatePassId).replace(/^GP-/, '');
+            
+            switchView('explorer');
+            
+            // Find the folder card element if it exists in the DOM to highlight it
+            let targetEl = null;
+            document.querySelectorAll('.folder-card').forEach(card => {
+                const onclickAttr = card.getAttribute('onclick') || '';
+                if (onclickAttr.includes(title)) {
+                    targetEl = card;
+                }
+            });
+            
+            selectFolder(targetEl, title, gatePassId);
         }
 
         function renderTable(tbodyId, docs) {
@@ -1489,13 +1535,41 @@
                 if(doc.status === 'WARNING') statusClass = 'warning';
                 if(doc.status === 'ERROR') statusClass = 'error';
                 
+                let safeFolderPath = (doc.folder_path || '').replace(/\\/g, '\\\\');
+
+                // Scanner-created folder name (e.g. "20226.08.17" = today's date folder)
+                let scannerFolderName = doc.source_folder || doc.gate_pass_no || 'Unknown';
+                
                 tbody.innerHTML += `
                     <tr>
-                        <td>${doc.id}</td>
+                        <td>
+                            <div style="display:flex;flex-direction:column;gap:3px">
+                                <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);font-weight:500">📄 Source PDF</span>
+                                <span style="
+                                    display:inline-block;
+                                    background:rgba(99,102,241,0.15);
+                                    border:1px solid rgba(99,102,241,0.4);
+                                    color:#a5b4fc;
+                                    font-size:0.82rem;
+                                    font-weight:600;
+                                    font-family:monospace;
+                                    padding:2px 10px;
+                                    border-radius:20px;
+                                    white-space:nowrap;
+                                    letter-spacing:0.03em;
+                                " title="Scanner folder: ${scannerFolderName}">${scannerFolderName}</span>
+                            </div>
+                        </td>
                         <td>${doc.container_no}</td>
                         <td>${doc.gate_pass_no}</td>
+                        <td style="font-weight:600;color:#67e8f9;letter-spacing:0.04em;">${doc.destination_location || '—'}</td>
                         <td><span class="badge ${statusClass}">${doc.status}</span></td>
-                        <td><button class="btn btn-outline" onclick="alert('Opening Workspace for ${doc.id}')">View</button></td>
+                        <td>
+                            <div style="display:flex;gap:6px;">
+                                <button class="btn btn-outline" onclick="openDocInExplorer('${safeFolderPath}', '${doc.gate_pass_no || ''}', '${doc.container_no || ''}')">View</button>
+                                <button class="btn btn-outline" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" onclick="deleteDocument('${doc.id}')">Delete</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -1504,6 +1578,22 @@
         function toggleChat() {
             const w = document.getElementById('chatWidget');
             w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function deleteDocument(id) {
+            if (!id || !confirm(`Are you sure you want to delete this document?`)) return;
+            try {
+                const res = await fetch(`${API_BASE}/documents/${encodeURIComponent(id)}?token=${TOKEN}`, { method: 'DELETE' });
+                if (res.ok) {
+                    fetchDocuments();
+                } else {
+                    const data = await res.json();
+                    alert(`Failed to delete document: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error deleting document.');
+            }
         }
 
         let analysisChart;
@@ -1613,7 +1703,7 @@
             if(e.key === 'Enter') sendChatMessage();
         }
         
-        function sendChatMessage() {
+        async function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
             if(!msg) return;
@@ -1625,11 +1715,23 @@
             // Scroll to bottom
             messages.scrollTop = messages.scrollHeight;
             
-            // Mock bot response
-            setTimeout(() => {
-                messages.innerHTML += `<div class="message bot">I can see that. Based on the IDP data, all containers for today have been processed. Is there a specific container number you want me to look up?</div>`;
+            try {
+                const res = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify({ message: msg, report_context: window.lastGeneratedReport || null })
+                });
+                const data = await res.json();
+                messages.innerHTML += `<div class="message bot">${data.response || 'Error getting response'}</div>`;
                 messages.scrollTop = messages.scrollHeight;
-            }, 1000);
+            } catch (e) {
+                console.error(e);
+                messages.innerHTML += `<div class="message bot">Sorry, an error occurred communicating with the server.</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }
         }
 
         async function connectScanner() {
@@ -1786,7 +1888,7 @@
         fetchDocuments();
 
         // AI Report Generator Logic
-        function generateAIReport() {
+        async function generateAIReport() {
             const input = document.getElementById('ai-report-input');
             const chat = document.getElementById('ai-report-chat');
             const msg = input.value.trim();
@@ -1818,53 +1920,51 @@
             `);
             chat.scrollTop = chat.scrollHeight;
             
-            // Mock API response after 2.5 seconds
-            setTimeout(() => {
+            try {
+                const res = await fetch(`${API_BASE}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify({ prompt: msg })
+                });
+                const data = await res.json();
+                
                 const loader = document.getElementById(loadingId);
                 if(loader) loader.remove();
+                
+                // Format response using marked.js
+                let formattedResponse = 'Error generating report';
+                if (data.response) {
+                    window.lastGeneratedReport = data.response; // Save for chat context
+                    formattedResponse = marked.parse(data.response);
+                }
+                
                 chat.insertAdjacentHTML('beforeend', `
                     <div style="display: flex; gap: 15px;">
                         <div style="width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🤖</div>
                         <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border-top-left-radius: 0; max-width: 85%; border: 1px solid rgba(255,255,255,0.1); width: 100%;">
-                            <p style="margin-bottom: 15px; color: var(--success-color); font-weight: 600;">✅ Report Generated Successfully!</p>
-                            <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem;">Here is the custom exception report based on current system data:</p>
-                            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 20px;">
-                                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                                    <thead style="background: rgba(255,255,255,0.05);">
-                                        <tr>
-                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Container</th>
-                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Status</th>
-                                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);">Exceptions Found</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">TGHU789123</td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge warning" style="padding: 4px 8px; font-size: 0.75rem;">Missing Invoice</span></td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">1</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">MSKU123456</td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge error" style="padding: 4px 8px; font-size: 0.75rem;">Unreadable BOL</span></td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">2</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">OOCU987654</td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);"><span class="badge warning" style="padding: 4px 8px; font-size: 0.75rem;">Date Mismatch</span></td>
-                                            <td style="padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">1</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn btn-outline" style="font-size: 0.85rem; padding: 8px 15px;">📥 Download CSV</button>
-                                <button class="btn btn-outline" style="font-size: 0.85rem; padding: 8px 15px;">📄 Export PDF</button>
-                            </div>
+                            <div class="markdown-report">${formattedResponse}</div>
                         </div>
                     </div>
                 `);
                 chat.scrollTop = chat.scrollHeight;
-            }, 2500);
+            } catch (e) {
+                console.error(e);
+                const loader = document.getElementById(loadingId);
+                if(loader) loader.remove();
+                
+                chat.insertAdjacentHTML('beforeend', `
+                    <div style="display: flex; gap: 15px;">
+                        <div style="width: 40px; height: 40px; background: var(--error-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">⚠️</div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border-top-left-radius: 0; max-width: 85%; border: 1px solid rgba(255,0,0,0.3); width: 100%;">
+                            <div style="color: var(--error-color); font-size: 0.95rem; line-height: 1.6;">Sorry, an error occurred while communicating with the AI.</div>
+                        </div>
+                    </div>
+                `);
+                chat.scrollTop = chat.scrollHeight;
+            }
         }
         function toggleSwitch(element) {
             const isOff = element.style.background.includes('rgba') || element.style.background.includes('0.1');
@@ -1884,7 +1984,7 @@
 
         // Real-time WebSocket connection
         function initWebSocket() {
-            const ws = new WebSocket('ws://localhost:8000/ws');
+            const ws = new WebSocket(`ws://${window.location.host}/api/v1/ws`);
             ws.onmessage = (event) => {
                 try {
                     const msg = JSON.parse(event.data);
@@ -1900,6 +2000,17 @@
             };
         }
         initWebSocket();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetchDocuments();
+            fetchExceptions();
+            fetchExplorerData();
+        }, 30000);
+        
+        // Initial load
+        fetchDocuments();
+        fetchExceptions();
     </script>
 </body>
 </html>

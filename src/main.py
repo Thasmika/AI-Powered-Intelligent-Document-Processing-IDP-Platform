@@ -2,6 +2,14 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
+from src.database.session import engine
+from src.database import models
+
+# IMPORTANT: Create all DB tables BEFORE importing routes,
+# because routes.py calls restore_documents_from_disk() at import time.
+models.Base.metadata.create_all(bind=engine)
+
+# Now it is safe to import the router (disk recovery runs here)
 from src.api.routes import router as api_router
 
 app = FastAPI(
@@ -28,5 +36,3 @@ import os
 if not os.path.exists("static"):
     os.makedirs("static")
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
-
-

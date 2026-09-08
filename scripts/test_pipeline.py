@@ -21,7 +21,7 @@ def generate_mock_qr_image(payload, filename):
 
 def test_valid_pipeline():
     print("--- Testing Valid Pipeline ---")
-    payload = {"gate_pass_no": "GP-1000", "container_no": "CONT123"}
+    payload = {"Customer": "LA", "GatePass": "VEHICLE", "id_no": "122844"}
     img_path = generate_mock_qr_image(payload, "test_valid_qr.png")
     
     state = simulate_intake_process(Path(img_path))
@@ -33,7 +33,7 @@ def test_valid_pipeline():
 
 def test_invalid_container():
     print("--- Testing Invalid Container (DLQ Routing) ---")
-    payload = {"gate_pass_no": "GP-9999", "container_no": "UNKNOWN-CONT"}
+    payload = {"gate_pass_no": "700068", "container_no": "UNKNOWN-CONT"}
     img_path = generate_mock_qr_image(payload, "test_invalid_qr.png")
     
     state = simulate_intake_process(Path(img_path))

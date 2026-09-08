@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     AZURE_DOCUMENT_INTELLIGENCE_KEY: str = os.getenv("AZURE_DOCUMENT_INTELLIGENCE_KEY", "")
     
     AZURE_STORAGE_CONNECTION_STRING: str = os.getenv("AZURE_STORAGE_CONNECTION_STRING", "")
+    
+    # LLM Settings
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
 
     # Storage Paths
     SCANNER_INPUT_DIR: Path = BASE_DIR / "data" / "scanner_input"

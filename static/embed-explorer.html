@@ -6,443 +6,550 @@
     <title>IDP Folder Explorer Widget</title>
     <style>
         :root {
-            --bg-color: #0b0c10;
-            --surface-color: #1f2833;
-            --primary-color: #45a29e;
-            --secondary-color: #66fcf1;
-            --text-color: #c5c6c7;
-            --text-muted: #8892b0;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --border-color: rgba(255, 255, 255, 0.05);
-            --primary-gradient: linear-gradient(135deg, #45a29e 0%, #66fcf1 100%);
+            --bg:      #0b0c10;
+            --surface: #151922;
+            --surface2:#1c2130;
+            --border:  rgba(255,255,255,0.07);
+            --primary: #4f9cf9;
+            --text:    #d4d8e2;
+            --muted:   #6b7280;
+            --success: #10b981;
+            --danger:  #ef4444;
         }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
-        }
-
-        h2 { margin: 0; }
-
-        .search-container {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: rgba(0, 0, 0, 0.2);
-            color: white;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-        
-        .icon-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .icon-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
-
-        /* Folder Explorer Specific Styles */
-        .breadcrumbs {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-
-        .explorer-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 24px;
-            height: calc(100vh - 120px);
-        }
-
-        .folder-grid {
             display: flex;
             flex-direction: column;
+            padding: 20px 28px 16px;
             gap: 16px;
-            overflow-y: auto;
-            padding-right: 10px;
         }
-
-        .folder-card {
-            background: rgba(30, 38, 56, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .folder-card.active {
-            background: rgba(40, 50, 75, 0.6);
-            border: 1px solid rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-        }
-
-        .folder-card:hover {
-            background: rgba(40, 50, 75, 0.6);
-        }
-
-        .folder-icon-large {
-            font-size: 5rem;
-            margin-bottom: 15px;
-            opacity: 0.6;
-        }
-        .folder-card.active .folder-icon-large {
-            opacity: 1;
-        }
-
-        .folder-card-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .folder-card-meta {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .document-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-            padding-right: 10px;
-            background: var(--surface-color);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            padding: 24px;
-        }
-
-        .doc-header-card {
-            background: rgba(30, 38, 56, 0.4);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 16px 20px;
+        .topbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
+            flex-shrink: 0;
         }
-
-        .doc-card {
-            background: rgba(20, 25, 35, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: all 0.2s;
+        .topbar h2 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+        .breadcrumb { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+        .breadcrumb span { color: var(--text); }
+        .search-input {
+            padding: 9px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: #fff;
+            font-size: 0.85rem;
+            width: 220px;
+            transition: border 0.2s;
         }
-
-        .doc-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-            background: rgba(30, 38, 56, 0.8);
-        }
-
-        .doc-thumbnail {
-            width: 60px;
-            height: 80px;
-            background: #fff;
-            border-radius: 4px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding: 4px;
-            position: relative;
-        }
-
-        .doc-thumbnail::before {
-            content: "📄";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.5rem;
-            color: #ccc;
-        }
-
-        .pdf-badge {
-            background: #ef4444;
-            color: white;
-            font-size: 0.6rem;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 3px;
-            z-index: 2;
-        }
-
-        .doc-info {
+        .search-input:focus { outline: none; border-color: var(--primary); }
+        .search-input::placeholder { color: var(--muted); }
+        .explorer {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 18px;
             flex: 1;
+            min-height: 0;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-label {
+            padding: 14px 18px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .folder-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-        
-        .doc-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #fff;
-        }
-        
-        .doc-meta-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 4px;
-        }
-
-        .doc-meta-item {
+        .folder-item {
             display: flex;
-            flex-direction: column;
-            font-size: 0.8rem;
-        }
-        
-        .doc-meta-label {
-            color: var(--text-muted);
-            margin-bottom: 2px;
-        }
-        
-        .doc-meta-value {
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .doc-actions {
-            display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid transparent;
         }
-
-        .badge-hollow {
+        .folder-item:hover { background: rgba(255,255,255,0.04); }
+        .folder-item.active {
+            background: rgba(79,156,249,0.12);
+            border-color: rgba(79,156,249,0.3);
+        }
+        .folder-emoji { font-size: 1.6rem; flex-shrink: 0; }
+        .folder-meta { flex: 1; min-width: 0; }
+        .folder-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .folder-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+        .doc-panel-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .doc-panel-title { font-size: 1rem; font-weight: 700; color: #fff; }
+        .doc-panel-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+        .doc-count-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.75rem;
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            background: transparent;
         }
-        .badge-hollow.verified { color: #10b981; border: 1px solid #10b981; }
-        .badge-hollow.processed { color: #14b8a6; border: 1px solid #14b8a6; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        .doc-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .doc-row {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        .doc-row:hover { border-color: rgba(79,156,249,0.3); transform: translateY(-1px); }
+        .doc-icon-wrap {
+            width: 48px; height: 56px;
+            background: linear-gradient(135deg, #1e2535, #252d40);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .doc-icon-wrap svg { width: 26px; height: 26px; opacity: 0.7; }
+        .pdf-corner {
+            position: absolute;
+            bottom: -1px; right: -1px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.55rem; font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 4px 0 8px 0;
+        }
+        .doc-info { flex: 1; min-width: 0; }
+        .doc-name {
+            font-weight: 600; color: #fff; font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+        .doc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag {
+            font-size: 0.7rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px;
+        }
+        .tag-type { background: rgba(79,156,249,0.12); color: var(--primary); border: 1px solid rgba(79,156,249,0.25); }
+        .tag-size { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+        .tag-ok   { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+        .doc-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-view {
+            padding: 8px 20px; border-radius: 8px; border: none;
+            background: var(--primary); color: #fff;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-view:hover { opacity: 0.88; transform: scale(1.03); }
+        .btn-dl {
+            width: 36px; height: 36px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04); color: var(--muted);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; font-size: 1rem;
+        }
+        .btn-dl:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .state-empty {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: var(--muted); gap: 14px; padding: 40px; text-align: center;
+        }
+        .big-icon { font-size: 3.5rem; opacity: 0.25; }
+        .state-empty p { font-size: 0.88rem; line-height: 1.6; }
+        #pdf-modal {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        #pdf-modal.open { display: flex; }
+        .modal-box {
+            background: #111520;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            width: 100%; max-width: 1000px; height: 90vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+        .modal-title {
+            font-weight: 700; color: #fff; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal-badge {
+            background: var(--danger); color: #fff;
+            font-size: 0.6rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 4px;
+        }
+        .modal-actions { display: flex; gap: 8px; }
+        .btn-modal {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: var(--muted);
+            cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-modal:hover { background: rgba(239,68,68,0.2); color: #ef4444; border-color: #ef4444; }
+        .pdf-iframe-wrap { flex: 1; background: #1a1a2e; }
+        #pdf-iframe { width: 100%; height: 100%; border: none; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid rgba(255,255,255,0.08);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
     </style>
 </head>
-<body style="padding: 20px 40px;">
+<body>
 
-    <div class="breadcrumbs">
-        Logistics Park / Folder Explorer / <span style="color: #fff;" id="bc-folder">All Folders</span>
+<div class="topbar">
+    <div>
+        <h2>📁 Folder Explorer</h2>
+        <div class="breadcrumb">Logistics Park › <span id="bc-folder">All Folders</span></div>
     </div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h2 style="font-size: 1.5rem; font-weight: 600;">Folder Explorer</h2>
-        <div style="display: flex; gap: 12px; align-items: center;">
-            <div class="search-container" style="margin-bottom: 0;">
-                <input type="text" class="search-input" id="search-input" placeholder="Search folders..." style="width: 250px;">
-            </div>
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">
-                Sort by ⌄
-            </div>
-            <div class="icon-btn" style="border-radius: 8px;">⋮</div>
+    <input type="text" class="search-input" id="search-input" placeholder="🔍  Search folders...">
+</div>
+
+<div class="explorer">
+    <div class="panel">
+        <div class="panel-label">📂 Processed Containers</div>
+        <div class="folder-list" id="folder-list">
+            <div class="state-empty"><div class="spinner"></div><p>Loading folders…</p></div>
         </div>
     </div>
 
-    <div class="explorer-layout">
-        <!-- Left: Folders -->
-        <div class="folder-grid" id="embed-folder-grid">
-            <div style="display: flex; background: rgba(30, 38, 56, 0.4); border-radius: 8px; padding: 4px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="flex: 1; text-align: center; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: white;">⊞ Grid</div>
-                <div style="flex: 1; text-align: center; padding: 6px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">≣ List</div>
+    <div class="panel">
+        <div class="doc-panel-header">
+            <div>
+                <div class="doc-panel-title" id="right-title">Select a Folder</div>
+                <div class="doc-panel-sub" id="right-sub">Click a folder on the left to view its documents</div>
             </div>
-            <div id="folder-list-container">
-                <!-- Populated by JS -->
-            </div>
+            <div class="doc-count-badge" id="doc-count">—</div>
         </div>
-
-        <!-- Right: Documents -->
-        <div class="document-list">
-            <div style="margin-bottom: 10px;">
-                <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 4px;" id="right-panel-title">Select a Folder</div>
-                <div style="color: var(--text-muted); font-size: 0.85rem;">Sorted, sequenced documents</div>
-            </div>
-            
-            <div id="embed-doc-list">
-                <div style="padding: 40px; text-align: center; color: var(--text-muted);">
-                    <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">📁</div>
-                    Click on a folder on the left to view its extracted documents.
-                </div>
+        <div class="doc-scroll" id="doc-list">
+            <div class="state-empty">
+                <div class="big-icon">📄</div>
+                <p>Select a processed container folder<br>from the left panel to view its documents.</p>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const API_BASE = 'http://localhost:8000/api/v1';
+<div id="pdf-modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">
+                <span class="modal-badge">PDF</span>
+                <span id="modal-filename">Document</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal" id="modal-dl-btn" title="Download">⬇</button>
+                <button class="btn-modal" onclick="closeModal()" title="Close (ESC)">✕</button>
+            </div>
+        </div>
+        <div class="pdf-iframe-wrap">
+            <iframe id="pdf-iframe" src="" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
 
-        async function fetchExplorerData() {
-            try {
-                const res = await fetch(`${API_BASE}/documents`);
-                if(!res.ok) throw new Error('API Error');
-                
-                const docs = await res.json();
-                const validDocs = docs.filter(d => d.folder_path);
-                
-                if (validDocs.length === 0) {
-                    // Injecting dummy folders for testing/demonstration since the API is empty
-                    renderFolders([
-                        { folder_path: "2023-10-16_Container-ZCSU982103", container_no: "ZCSU982103" },
-                        { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
-                        { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
-                    ]);
-                    return;
-                }
-                
-                renderFolders(validDocs);
-            } catch (e) {
-                console.error(e);
-                // Fallback Mock Data
-                renderFolders([
-                    { folder_path: "2023-10-15_Container-TGHU789123", container_no: "TGHU789123" },
-                    { folder_path: "2023-10-14_Container-MSKU123456", container_no: "MSKU123456" }
-                ]);
-            }
-        }
+<script>
+    const API   = 'http://localhost:8000/api/v1';
+    const TOKEN = 'dummy-jwt-token';
+    let allFolders   = [];
+    let currentFolder = null;
 
-        function renderFolders(folders) {
-            const container = document.getElementById('folder-list-container');
-            container.innerHTML = '';
-            
-            folders.forEach((folder, idx) => {
-                const title = folder.folder_path.split('/').pop() || folder.folder_path;
-                container.innerHTML += `
-                    <div class="folder-card ${idx === 0 ? 'active' : ''}" onclick="selectFolder(this, '${title}', '${folder.container_no}')">
-                        <div class="folder-icon-large">📁</div>
-                        <div class="folder-card-title">${folder.container_no}</div>
-                        <div class="folder-card-meta">${title.substring(0, 10)}</div>
-                    </div>
-                `;
+    function docTypeFromName(name) {
+        const n = name.toLowerCase();
+        if (n.includes('gatepass') || n.includes('gate_pass')) return 'Gate Pass';
+        if (n.includes('invoice'))  return 'Invoice';
+        if (n.includes('packing'))  return 'Packing List';
+        if (n.includes('customs') || n.includes('declaration')) return 'Customs Doc';
+        if (n.includes('bill'))     return 'Bill of Lading';
+        if (n.includes('delivery')) return 'Delivery Order';
+        if (n.includes('unknown'))  return 'Unknown';
+        return 'Document';
+    }
+
+    function fmtSize(bytes) {
+        if (!bytes || bytes < 1024) return (bytes || 0) + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function pdfSrc(folder, file) {
+        return API + '/documents/' + encodeURIComponent(folder) + '/files/' + encodeURIComponent(file) + '?token=' + TOKEN;
+    }
+
+    function openPdf(folder, file) {
+        const src = pdfSrc(folder, file);
+        document.getElementById('modal-filename').textContent = file;
+        document.getElementById('pdf-iframe').src = src;
+        document.getElementById('modal-dl-btn').onclick = function() {
+            var a = document.createElement('a');
+            a.href = src; a.download = file; a.click();
+        };
+        document.getElementById('pdf-modal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('pdf-modal').classList.remove('open');
+        document.getElementById('pdf-iframe').src = '';
+    }
+
+    document.getElementById('pdf-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+    function downloadFile(folder, file) {
+        var a = document.createElement('a');
+        a.href = pdfSrc(folder, file); a.download = file; a.click();
+    }
+
+    async function loadFolders() {
+        try {
+            const res  = await fetch(API + '/documents', { headers: { token: TOKEN } });
+            if (!res.ok) throw new Error();
+            const docs = await res.json();
+            const validDocs = docs.filter(function(d) { return d.folder_path && d.status !== 'ERROR'; });
+            const seen = new Set();
+            allFolders = validDocs.filter(function(d) {
+                if (seen.has(d.folder_path)) return false;
+                seen.add(d.folder_path);
+                return true;
             });
+            renderFolders(allFolders);
+        } catch(e) {
+            document.getElementById('folder-list').innerHTML =
+                '<div class="state-empty"><div class="big-icon">⚠️</div><p>Could not load folders.<br>Make sure the backend is running.</p></div>';
+        }
+    }
 
-            // Auto-select first folder
-            if(folders.length > 0) {
-                selectFolder(container.querySelector('.folder-card'), folders[0].folder_path.split('/').pop() || folders[0].folder_path, folders[0].container_no);
+    function renderFolders(folders) {
+        var list = document.getElementById('folder-list');
+        if (!folders.length) {
+            list.innerHTML = '<div class="state-empty"><div class="big-icon">📭</div><p>No processed folders yet.</p></div>';
+            return;
+        }
+        list.innerHTML = folders.map(function(f, i) {
+            var name = f.folder_path.replace(/\\/g, '/').split('/').pop();
+            var dot  = f.status === 'VALID' ? '🟢' : f.status === 'WARNING' ? '🟡' : '🔴';
+            return '<div class="folder-item' + (i === 0 ? ' active' : '') + '" id="fi-' + i + '" onclick="selectFolder(' + i + ')">' +
+                '<div class="folder-emoji">📁</div>' +
+                '<div class="folder-meta">' +
+                    '<div class="folder-name">' + name + '</div>' +
+                    '<div class="folder-sub">' + dot + ' ' + f.status + ' · GP ' + f.gate_pass_no + '</div>' +
+                '</div></div>';
+        }).join('');
+        if (folders.length > 0) selectFolder(0);
+    }
+
+    function selectFolder(idx) {
+        document.querySelectorAll('.folder-item').forEach(function(el) { el.classList.remove('active'); });
+        var el = document.getElementById('fi-' + idx);
+        if (el) el.classList.add('active');
+        currentFolder = allFolders[idx];
+        var name = currentFolder.folder_path.replace(/\\/g, '/').split('/').pop();
+        document.getElementById('bc-folder').textContent = name;
+        loadDocuments(name);
+    }
+
+    async function loadDocuments(folderName) {
+        var docList    = document.getElementById('doc-list');
+        var titleEl    = document.getElementById('right-title');
+        var subEl      = document.getElementById('right-sub');
+        var countEl    = document.getElementById('doc-count');
+        titleEl.textContent = folderName;
+        subEl.textContent   = 'Loading…';
+        countEl.textContent = '…';
+        docList.innerHTML   = '<div class="state-empty"><div class="spinner"></div><p>Fetching files…</p></div>';
+        try {
+            const res  = await fetch(API + '/documents/' + encodeURIComponent(folderName) + '/files', { headers: { token: TOKEN } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            var pdfs   = (data.files || []).filter(function(f) { return f.name.toLowerCase().endsWith('.pdf'); });
+            countEl.textContent = pdfs.length + ' file' + (pdfs.length !== 1 ? 's' : '');
+            subEl.textContent   = 'Gate Pass · Container ' + ((currentFolder && currentFolder.container_no) || '—');
+            if (!pdfs.length) {
+                docList.innerHTML = '<div class="state-empty"><div class="big-icon">📭</div><p>No PDF files found in this folder.</p></div>';
+                return;
             }
-        }
-
-        function selectFolder(el, folderPath, containerNo) {
-            document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('active'));
-            if(el) el.classList.add('active');
+            var gatePassId = currentFolder && currentFolder.gate_pass_no ? currentFolder.gate_pass_no : folderName.replace(/^.*_GP-/, '');
             
-            document.getElementById('bc-folder').innerText = containerNo;
-            document.getElementById('right-panel-title').innerText = `${folderPath.substring(0, 10)} | Container: ${containerNo}`;
-            
-            const docList = document.getElementById('embed-doc-list');
-            docList.innerHTML = `
-                <div class="doc-header-card">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 2.5rem; opacity: 0.7;">📁</div>
-                        <div>
-                            <div style="font-weight: 600;">${folderPath.substring(0, 10)} | Container: ${containerNo}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">4 Files extracted by AI</div>
-                        </div>
+            var summaryHtml = `
+                <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden;">
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                            <thead style="background: rgba(255,255,255,0.02); color: var(--muted); font-size: 0.75rem; letter-spacing: 0.5px; border-bottom: 1px solid var(--border);">
+                                <tr>
+                                    <th style="padding: 12px 16px; font-weight: 600; text-transform: uppercase;">Doc No</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; text-transform: uppercase;">Document Type</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; text-transform: uppercase;">Indexed Data</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; text-transform: uppercase;">Preview</th>
+                                    <th style="padding: 12px 16px; font-weight: 600; text-transform: uppercase;">Indexed Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 16px; vertical-align: top; color: #fff; font-size: 0.95rem;">122844</td>
+                                    <td style="padding: 16px; vertical-align: top; color: #fff; font-size: 0.95rem;">GRN_LPPL</td>
+                                    <td style="padding: 16px; vertical-align: top;">
+                                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: rgba(255,255,255,0.05); color: var(--muted); padding: 2px 8px; font-size: 0.75rem; width: 70px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">Customer</span>
+                                                <span style="color: #fff; font-size: 0.9rem;">LA</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: rgba(234,179,8,0.1); color: #eab308; padding: 2px 8px; font-size: 0.75rem; width: 70px; font-weight: 600; border-radius: 4px; border: 1px solid rgba(234,179,8,0.25); text-align: center;">GatePass</span>
+                                                <span style="color: #fff; font-size: 0.9rem;">${gatePassId}</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: rgba(255,255,255,0.05); color: var(--muted); padding: 2px 8px; font-size: 0.75rem; width: 70px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">id</span>
+                                                <span style="color: #fff; font-size: 0.9rem;">122844</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: rgba(255,255,255,0.05); color: var(--muted); padding: 2px 8px; font-size: 0.75rem; width: 70px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">DateTime</span>
+                                                <span style="color: #fff; font-size: 0.9rem;">2025/11/10 11:31:11</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="background: rgba(255,255,255,0.05); color: var(--muted); padding: 2px 8px; font-size: 0.75rem; width: 70px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">GRNNo</span>
+                                                <span style="color: #fff; font-size: 0.9rem;">INBOUND</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top;">
+                                        <div style="border: 1px solid var(--border); width: 70px; height: 90px; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); padding: 4px; box-sizing: border-box; border-radius: 4px;">
+                                            <div style="border: 1px solid var(--border); height: 10px; margin-bottom: 4px; border-radius: 2px;"></div>
+                                            <div style="display: flex; gap: 4px; flex: 1; margin-bottom: 4px;">
+                                                <div style="border: 1px solid var(--border); flex: 1; border-radius: 2px;"></div>
+                                                <div style="border: 1px solid var(--border); flex: 1; border-radius: 2px;"></div>
+                                            </div>
+                                            <div style="border: 1px solid var(--border); flex: 1.5; margin-bottom: 4px; border-radius: 2px;"></div>
+                                            <div style="display: flex; gap: 4px; justify-content: space-around; height: 12px;">
+                                                <div style="border: 1px solid var(--border); border-radius: 50%; width: 12px; height: 12px;"></div>
+                                                <div style="border: 1px solid var(--border); border-radius: 50%; width: 12px; height: 12px;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top; color: var(--muted); font-size: 0.85rem;">12-11-2025<br>10:42 AM</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div style="color: var(--text-muted); cursor: pointer;">⌄</div>
                 </div>
-
-                <div class="doc-card">
-                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
-                    <div class="doc-info">
-                        <div class="doc-title">01_GatePass.pdf</div>
-                        <div class="doc-meta-grid">
-                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Gate Pass</span></div>
-                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">1.2 MB</span></div>
-                        </div>
-                    </div>
-                    <div class="doc-actions">
-                        <span class="badge-hollow verified">Verified</span>
-                        <div class="icon-btn">👁️</div>
-                        <div class="icon-btn">⬇️</div>
-                    </div>
-                </div>
-                
-                <div class="doc-card">
-                    <div class="doc-thumbnail"><span class="pdf-badge">PDF</span></div>
-                    <div class="doc-info">
-                        <div class="doc-title">02_CommercialInvoice.pdf</div>
-                        <div class="doc-meta-grid">
-                            <div class="doc-meta-item"><span class="doc-meta-label">Type</span><span class="doc-meta-value">Invoice</span></div>
-                            <div class="doc-meta-item"><span class="doc-meta-label">Size</span><span class="doc-meta-value">2.4 MB</span></div>
-                        </div>
-                    </div>
-                    <div class="doc-actions">
-                        <span class="badge-hollow processed">Processed</span>
-                        <div class="icon-btn">👁️</div>
-                        <div class="icon-btn">⬇️</div>
-                    </div>
-                </div>
+                <div style="font-weight: 600; font-size: 0.95rem; color: #fff; margin: 10px 0 5px;">Available Documents</div>
             `;
-        }
 
-        fetchExplorerData();
-
-        // Real-time WebSocket connection
-        function initWebSocket() {
-            const ws = new WebSocket('ws://localhost:8000/ws');
-            ws.onmessage = (event) => {
-                try {
-                    const msg = JSON.parse(event.data);
-                    if (msg.type === 'DOCUMENT_PROCESSED') {
-                        console.log("New document processed, refreshing embedded widget...");
-                        fetchExplorerData();
-                    }
-                } catch(e) { console.error(e); }
-            };
-            ws.onclose = () => {
-                // Reconnect after 5s
-                setTimeout(initWebSocket, 5000);
-            };
+            var docsHtml = pdfs.map(function(pdf) {
+                var dtype      = docTypeFromName(pdf.name);
+                var isGatePass = dtype === 'Gate Pass';
+                return '<div class="doc-row">' +
+                    '<div class="doc-icon-wrap">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/></svg>' +
+                        '<span class="pdf-corner">PDF</span>' +
+                    '</div>' +
+                    '<div class="doc-info">' +
+                        '<div class="doc-name" title="' + pdf.name + '">' + pdf.name + '</div>' +
+                        '<div class="doc-tags">' +
+                            '<span class="tag tag-type">' + dtype + '</span>' +
+                            '<span class="tag tag-size">' + fmtSize(pdf.size) + '</span>' +
+                            (isGatePass ? '<span class="tag tag-ok">✓ Primary</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="doc-actions">' +
+                        '<button class="btn-view" onclick="openPdf(\'' + folderName + '\',\'' + pdf.name + '\')">' +
+                            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+                            'View' +
+                        '</button>' +
+                        '<button class="btn-dl" title="Download" onclick="downloadFile(\'' + folderName + '\',\'' + pdf.name + '\')">⬇</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            docList.innerHTML = summaryHtml + docsHtml;
+        } catch(e) {
+            docList.innerHTML = '<div class="state-empty"><div class="big-icon">⚠️</div><p>Failed to load documents.</p></div>';
+            countEl.textContent = 'Error';
         }
-        initWebSocket();
-    </script>
+    }
+
+    document.getElementById('search-input').addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        var filtered = q ? allFolders.filter(function(f) {
+            var name = f.folder_path.replace(/\\/g, '/').split('/').pop().toLowerCase();
+            return name.includes(q) || (f.gate_pass_no && f.gate_pass_no.toLowerCase().includes(q)) || (f.container_no && f.container_no.toLowerCase().includes(q));
+        }) : allFolders;
+        renderFolders(filtered);
+    });
+
+    loadFolders();
+    setInterval(loadFolders, 30000);
+
+    (function initWS() {
+        var ws = new WebSocket('ws://localhost:8000/api/v1/ws');
+        ws.onmessage = function(e) {
+            try { var m = JSON.parse(e.data); if (m.type === 'DOCUMENT_PROCESSED') loadFolders(); } catch(_) {}
+        };
+        ws.onclose = function() { setTimeout(initWS, 5000); };
+    })();
+</script>
 </body>
 </html>
