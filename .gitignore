@@ -6,3 +6,8 @@ __pycache__/
 .vscode/
 *.log
 qr_payloads/
+*.db
+debug_*.txt
+*.processed
+temp_*.png
+scratch/

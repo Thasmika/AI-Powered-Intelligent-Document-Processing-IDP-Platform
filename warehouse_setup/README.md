@@ -43,8 +43,9 @@ warehouse_setup/
 ## Auto-Start on Boot (Optional)
 
 1. Press `Win + R`, type `shell:startup`, press Enter
-2. Copy `START_SCANNER.bat` into that folder
-3. Now it starts automatically when the PC boots!
+2. **Right-click** on `START_SCANNER.bat`, select **Copy**
+3. In the startup folder, right-click and select **Paste shortcut**
+4. Now it starts automatically when the PC boots!
 
 ## Troubleshooting
 

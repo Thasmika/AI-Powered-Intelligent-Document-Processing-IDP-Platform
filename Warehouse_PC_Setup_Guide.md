@@ -167,8 +167,9 @@ So the manager doesn't have to manually start the script every morning:
 1. Press **`Win + R`** on the keyboard
 2. Type **`shell:startup`** and press **Enter**
 3. A folder will open (this is the Windows Startup folder)
-4. **Copy** the `START_SCANNER.bat` file from `C:\EFL_Scanner\` into this Startup folder
-5. Done! The scanner watcher will now start automatically when the PC turns on.
+4. **Right-click** on the `START_SCANNER.bat` file in `C:\EFL_Scanner\`, select **"Copy"**
+5. Go to the Startup folder, **Right-click** in an empty space, and select **"Paste shortcut"**
+6. Done! The scanner watcher will now start automatically when the PC turns on.
 
 ---
 

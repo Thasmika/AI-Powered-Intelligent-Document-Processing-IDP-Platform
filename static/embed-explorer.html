@@ -311,7 +311,7 @@
 </div>
 
 <script>
-    const API   = 'http://localhost:8000/api/v1';
+    const API   = '/api/v1';
     const TOKEN = 'dummy-jwt-token';
     let allFolders   = [];
     let currentFolder = null;
@@ -544,7 +544,8 @@
     setInterval(loadFolders, 30000);
 
     (function initWS() {
-        var ws = new WebSocket('ws://localhost:8000/api/v1/ws');
+        var ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var ws = new WebSocket(ws_protocol + '//' + window.location.host + '/api/v1/ws');
         ws.onmessage = function(e) {
             try { var m = JSON.parse(e.data); if (m.type === 'DOCUMENT_PROCESSED') loadFolders(); } catch(_) {}
         };
